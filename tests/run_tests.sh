@@ -46,22 +46,22 @@ echo ""
 
 echo -e "${YELLOW}[1] Basic field filtering${NC}"
 
-run_test "filter by module"           6 cat "$SAMPLE" \| "$EXE" --module lidar_driver
-run_test "filter by level ERROR"      3 cat "$SAMPLE" \| "$EXE" --level ERROR
-run_test "filter by module + level"   1 cat "$SAMPLE" \| "$EXE" --module lidar_driver --level ERROR
-run_test "filter no match"            0 cat "$SAMPLE" \| "$EXE" --module radar_driver --level ERROR
+run_test "filter by module"           6 cat "$SAMPLE" \| "$EXE" -f module=lidar_driver
+run_test "filter by level ERROR"      3 cat "$SAMPLE" \| "$EXE" -f level=ERROR
+run_test "filter by module + level"   1 cat "$SAMPLE" \| "$EXE" -f module=lidar_driver -f level=ERROR
+run_test "filter no match"            0 cat "$SAMPLE" \| "$EXE" -f module=radar_driver -f level=ERROR
 
 echo ""
 echo -e "${YELLOW}[2] Edge cases${NC}"
 
-run_test "empty input"                0 echo "" \| "$EXE" --module lidar
-run_test "non-matching lines"         0 printf "not a log\nneither\n" \| "$EXE" --module lidar
-run_test "case insensitive level"     3 cat "$SAMPLE" \| "$EXE" --level error
+run_test "empty input"                0 echo "" \| "$EXE" -f module=lidar
+run_test "non-matching lines"         0 printf "not a log\nneither\n" \| "$EXE" -f module=lidar
+run_test "case insensitive level"     3 cat "$SAMPLE" \| "$EXE" -f level=error
 
 echo ""
 echo -e "${YELLOW}[3] Pipe mode${NC}"
 
-run_test "pipe from cat"              6 cat "$SAMPLE" \| "$EXE" --module planner
+run_test "pipe from cat"              6 cat "$SAMPLE" \| "$EXE" -f module=planner
 
 echo ""
 echo -e "${CYAN}========================================"

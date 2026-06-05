@@ -39,16 +39,16 @@ chmod +x scripts/build.sh
 
 ```bash
 # 按模块过滤
-log-query app.log --module lidar
+log-query app.log -f module=lidar
 
 # 按日志级别过滤
-log-query app.log --level ERROR
+log-query app.log -f level=ERROR
 
-# 组合过滤
-log-query app.log --module lidar --level ERROR
+# 组合过滤（可重复使用 -f）
+log-query app.log -f module=lidar -f level=ERROR
 
 # 从管道读取
-cat app.log | log-query --module planner --level WARN
+cat app.log | log-query -f module=planner -f level=WARN
 ```
 
 ### 命令行参数
@@ -56,9 +56,8 @@ cat app.log | log-query --module planner --level WARN
 | 参数 | 说明 |
 |------|------|
 | `file` | 日志文件路径（`-` 表示 stdin） |
+| `-f, --filter` | 字段过滤 `field=value`，可重复使用 |
 | `--format-config` | 日志格式配置文件路径（默认 `config/adas_default.json`） |
-| `--module` | 按模块名过滤 |
-| `--level` | 按日志级别过滤 |
 | `--output` | 输出模式：`color`（默认） |
 
 ### 日志格式配置
@@ -69,7 +68,7 @@ cat app.log | log-query --module planner --level WARN
 [2024-01-15 14:32:01.123] [ERROR] [lidar_driver] [rx_thread] Failed to read sensor data
 ```
 
-可通过 `--format-config` 指定自定义格式的 JSON 配置文件。
+可通过 `--format-config` 指定自定义格式的 JSON 配置文件。JSON 中通过 `level_field` 指定级别字段名，用于着色。
 
 ## 项目结构
 

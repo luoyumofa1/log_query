@@ -28,6 +28,7 @@ LogFormatConfig load_format_config(const std::string& path) {
     LogFormatConfig config;
     config.name = j.at("name").get<std::string>();
     config.pattern = j.at("pattern").get<std::string>();
+    config.level_field = j.value("level_field", "");
 
     for (auto& [field_name, field_json] : j.at("fields").items()) {
         FieldConfig fc;

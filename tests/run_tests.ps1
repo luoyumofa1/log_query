@@ -34,22 +34,22 @@ Write-Host ""
 Write-Host "[1] Basic field filtering" -ForegroundColor Yellow
 
 Test-Case "filter by module" {
-    $out = Get-Content $sample | & $exe --module lidar_driver
+    $out = Get-Content $sample | & $exe -f module=lidar_driver
     if ($out.Count -ne 6) { throw "Expected 6 lines, got $($out.Count)" }
 }
 
 Test-Case "filter by level ERROR" {
-    $out = Get-Content $sample | & $exe --level ERROR
+    $out = Get-Content $sample | & $exe -f level=ERROR
     if ($out.Count -ne 3) { throw "Expected 3 lines, got $($out.Count)" }
 }
 
 Test-Case "filter by module + level" {
-    $out = Get-Content $sample | & $exe --module lidar_driver --level ERROR
+    $out = Get-Content $sample | & $exe -f module=lidar_driver -f level=ERROR
     if ($out.Count -ne 1) { throw "Expected 1 line, got $($out.Count)" }
 }
 
 Test-Case "filter by module + level (no match)" {
-    $out = Get-Content $sample | & $exe --module radar_driver --level ERROR
+    $out = Get-Content $sample | & $exe -f module=radar_driver -f level=ERROR
     if ($out.Count -ne 0) { throw "Expected 0 lines, got $($out.Count)" }
 }
 
@@ -57,17 +57,17 @@ Write-Host ""
 Write-Host "[2] Edge cases" -ForegroundColor Yellow
 
 Test-Case "empty input" {
-    $out = "" | & $exe --module lidar
+    $out = "" | & $exe -f module=lidar
     if ($out.Count -ne 0) { throw "Expected 0 lines, got $($out.Count)" }
 }
 
 Test-Case "non-matching format lines are skipped" {
-    $out = @("this is not a log line", "neither is this") | & $exe --module lidar
+    $out = @("this is not a log line", "neither is this") | & $exe -f module=lidar
     if ($out.Count -ne 0) { throw "Expected 0 lines, got $($out.Count)" }
 }
 
 Test-Case "case insensitive level matching" {
-    $out = Get-Content $sample | & $exe --level error
+    $out = Get-Content $sample | & $exe -f level=error
     if ($out.Count -ne 3) { throw "Expected 3 lines, got $($out.Count)" }
 }
 
@@ -75,7 +75,7 @@ Write-Host ""
 Write-Host "[3] Pipe mode (stdin)" -ForegroundColor Yellow
 
 Test-Case "pipe from Get-Content" {
-    $out = Get-Content $sample | & $exe --module planner
+    $out = Get-Content $sample | & $exe -f module=planner
     if ($out.Count -ne 6) { throw "Expected 6 lines, got $($out.Count)" }
 }
 

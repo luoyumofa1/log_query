@@ -7,11 +7,18 @@
 
 namespace log_query {
 
+ColorRenderer::ColorRenderer(std::string level_field)
+    : level_field_(std::move(level_field))
+{
+}
+
 void ColorRenderer::render_line(const LogLine& line) {
     std::string level = "INFO";
-    auto it = line.fields.find("level");
-    if (it != line.fields.end() && std::holds_alternative<std::string>(it->second)) {
-        level = std::get<std::string>(it->second);
+    if (!level_field_.empty()) {
+        auto it = line.fields.find(level_field_);
+        if (it != line.fields.end() && std::holds_alternative<std::string>(it->second)) {
+            level = std::get<std::string>(it->second);
+        }
     }
 
     const char* color = level_color(level);

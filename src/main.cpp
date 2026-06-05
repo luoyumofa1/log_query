@@ -9,21 +9,30 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
+
+static std::pair<std::string, std::string> parse_filter(const std::string& raw) {
+    auto eq = raw.find('=');
+    if (eq == std::string::npos) {
+        throw std::runtime_error("Invalid filter format: '" + raw +
+                                 "'. Expected field=value");
+    }
+    return {raw.substr(0, eq), raw.substr(eq + 1)};
+}
 
 int main(int argc, char** argv) {
     CLI::App app{"log-query — structured log query tool"};
 
     std::string log_file = "-";
     std::string format_config;
-    std::string module_filter;
-    std::string level_filter;
+    std::vector<std::string> filters;
     std::string output_mode = "color";
 
     app.add_option("file", log_file, "Log file path (use - for stdin)");
     app.add_option("--format-config", format_config,
                    "Path to log format JSON config file");
-    app.add_option("--module", module_filter, "Filter by module name");
-    app.add_option("--level", level_filter, "Filter by log level");
+    app.add_option("-f,--filter", filters,
+                   "Field filter (field=value, repeatable)");
     app.add_option("--output", output_mode, "Output mode: color, json, csv");
 
     CLI11_PARSE(app, argc, argv);
@@ -39,20 +48,18 @@ int main(int argc, char** argv) {
         log_query::LineParser parser(format);
 
         log_query::FilterChain chain;
-        if (!module_filter.empty()) {
-            chain.add(std::make_unique<log_query::FieldEqualFilter>("module", module_filter));
-        }
-        if (!level_filter.empty()) {
-            chain.add(std::make_unique<log_query::FieldEqualFilter>("level", level_filter));
+        for (auto& f : filters) {
+            auto [field, value] = parse_filter(f);
+            chain.add(std::make_unique<log_query::FieldEqualFilter>(field, value));
         }
 
         std::unique_ptr<log_query::Renderer> renderer;
         if (output_mode == "color") {
-            renderer = std::make_unique<log_query::ColorRenderer>();
+            renderer = std::make_unique<log_query::ColorRenderer>(format.level_field);
         } else {
             std::cerr << "Warning: output mode '" << output_mode
                       << "' not yet implemented, falling back to color\n";
-            renderer = std::make_unique<log_query::ColorRenderer>();
+            renderer = std::make_unique<log_query::ColorRenderer>(format.level_field);
         }
 
         log_query::FileReader reader(log_file);
