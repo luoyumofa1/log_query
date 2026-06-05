@@ -1,6 +1,7 @@
 #include "line_parser.h"
 #include "field.h"
 
+#include <cctype>
 #include <stdexcept>
 
 namespace log_query {
@@ -33,6 +34,27 @@ static std::vector<Token> tokenize(const std::string& pattern) {
     return tokens;
 }
 
+static bool match_fixed_flexible(std::string_view raw, size_t& pos, std::string_view fixed) {
+    size_t fi = 0;
+    while (fi < fixed.size()) {
+        if (pos >= raw.size()) return false;
+
+        if (std::isspace(static_cast<unsigned char>(fixed[fi]))) {
+            while (pos < raw.size() && std::isspace(static_cast<unsigned char>(raw[pos]))) {
+                ++pos;
+            }
+            while (fi < fixed.size() && std::isspace(static_cast<unsigned char>(fixed[fi]))) {
+                ++fi;
+            }
+        } else {
+            if (raw[pos] != fixed[fi]) return false;
+            ++pos;
+            ++fi;
+        }
+    }
+    return true;
+}
+
 LineParser::LineParser(const LogFormatConfig& config)
     : tokens_(tokenize(config.pattern))
     , config_(config)
@@ -49,9 +71,7 @@ std::optional<LogLine> LineParser::parse(std::string_view raw, int64_t line_numb
         auto& tok = tokens_[i];
 
         if (tok.type == Token::FIXED) {
-            if (pos + tok.value.size() > raw.size()) return std::nullopt;
-            if (raw.substr(pos, tok.value.size()) != tok.value) return std::nullopt;
-            pos += tok.value.size();
+            if (!match_fixed_flexible(raw, pos, tok.value)) return std::nullopt;
         } else {
             size_t end;
             if (i + 1 < tokens_.size()) {
@@ -88,9 +108,16 @@ std::optional<LogLine> LineParser::parse(std::string_view raw, int64_t line_numb
 size_t LineParser::find_next_fixed(std::string_view raw, size_t start, size_t token_idx) const {
     for (size_t i = token_idx + 1; i < tokens_.size(); ++i) {
         if (tokens_[i].type == Token::FIXED) {
-            auto found = raw.find(tokens_[i].value, start);
-            if (found != std::string_view::npos) {
-                return found;
+            auto& fixed = tokens_[i].value;
+            size_t fi = 0;
+            while (fi < fixed.size() && std::isspace(static_cast<unsigned char>(fixed[fi]))) {
+                ++fi;
+            }
+            if (fi < fixed.size()) {
+                auto found = raw.find(fixed[fi], start);
+                if (found != std::string_view::npos) {
+                    return found;
+                }
             }
         }
     }

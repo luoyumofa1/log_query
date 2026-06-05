@@ -1,0 +1,25 @@
+[2024-01-15 08:00:00.100] [INFO ] [can_driver]    [main]      CAN bus initialized, 3 channels
+[2024-01-15 08:00:00.200] [INFO ] [lidar_driver]  [main]      Lidar sensor connected on /dev/ttyUSB0
+[2024-01-15 08:00:00.300] [INFO ] [radar_driver]  [main]      Radar ARS408 initialized
+[2024-01-15 08:00:01.100] [INFO ] [fusion_engine] [main]      Sensor fusion started
+[2024-01-15 08:00:01.200] [INFO ] [planner]       [main]      Global path loaded: 320 waypoints
+[2024-01-15 08:00:01.300] [INFO ] [control]       [main]      MPC controller ready
+[2024-01-15 08:00:02.100] [DEBUG] [can_driver]    [rx]        CAN frame: id=0x123, dlc=8
+[2024-01-15 08:00:02.200] [DEBUG] [lidar_driver]  [rx]        Point cloud: 24000 points
+[2024-01-15 08:00:03.100] [WARN ] [lidar_driver]  [rx]        Packet loss detected, seq gap: 3
+[2024-01-15 08:00:03.200] [INFO ] [planner]       [main]      Trajectory updated: 200 waypoints
+[2024-01-15 08:00:04.100] [ERROR] [lidar_driver]  [rx]        DMA buffer overflow on channel 0
+[2024-01-15 08:00:04.200] [WARN ] [fusion_engine] [main]      Lidar data timeout, using prediction
+[2024-01-15 08:00:05.100] [INFO ] [lidar_driver]  [rx]        DMA recovered, buffer cleared
+[2024-01-15 08:00:05.200] [INFO ] [fusion_engine] [main]      Lidar data restored
+[2024-01-15 08:00:06.100] [ERROR] [planner]       [main]      Path planning failed: obstacle too close
+[2024-01-15 08:00:06.200] [WARN ] [planner]       [main]      Fallback to conservative path
+[2024-01-15 08:00:06.300] [INFO ] [planner]       [main]      Recovery successful
+[2024-01-15 08:00:07.100] [ERROR] [can_driver]    [tx]        CAN transmit timeout on channel 1
+[2024-01-15 08:00:07.200] [FATAL] [can_driver]    [main]      CAN bus offline, emergency stop triggered
+[2024-01-15 08:00:07.300] [INFO ] [control]       [main]      Emergency brake engaged
+[2024-01-15 08:00:07.400] [INFO ] [radar_driver]  [main]      Radar shutdown complete
+[2024-01-15 08:00:07.500] [INFO ] [lidar_driver]  [main]      Lidar shutdown complete
+[2024-01-15 08:00:07.600] [INFO ] [fusion_engine] [main]      Fusion engine stopped
+[2024-01-15 08:00:07.700] [INFO ] [planner]       [main]      Planner stopped
+[2024-01-15 08:00:07.800] [INFO ] [control]       [main]      Controller stopped
