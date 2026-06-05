@@ -1,0 +1,24 @@
+{
+  "name": "adas_default",
+  "pattern": "[{timestamp}] [{level}] [{module}] [{thread}] {message}",
+  "fields": {
+    "timestamp": {
+      "type": "datetime",
+      "format": "%Y-%m-%d %H:%M:%S.%f"
+    },
+    "level": {
+      "type": "enum",
+      "values": ["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"]
+    },
+    "module": {
+      "type": "string"
+    },
+    "thread": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string",
+      "greedy": true
+    }
+  }
+}

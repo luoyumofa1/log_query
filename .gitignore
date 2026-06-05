@@ -1,0 +1,12 @@
+build/
+*.exe
+*.o
+*.obj
+*.out
+.vs/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
