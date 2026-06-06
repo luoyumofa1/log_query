@@ -66,7 +66,14 @@ run_test "plain output with filter"     6 cat "$SAMPLE" \| "$EXE" -f module=plan
 run_test "plain matches color count"    4 cat "$SAMPLE" \| "$EXE" -f level=WARN --output plain
 
 echo ""
-echo -e "${YELLOW}[5] Pipe mode${NC}"
+echo -e "${YELLOW}[5] Summary output mode${NC}"
+
+run_test "summary all lines"           10 cat "$SAMPLE" \| "$EXE" --output summary
+run_test "summary with filter"          6 cat "$SAMPLE" \| "$EXE" --output summary -f level=ERROR
+run_test "summary with time range"     10 cat "$SAMPLE" \| "$EXE" --output summary --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:07"
+
+echo ""
+echo -e "${YELLOW}[6] Pipe mode${NC}"
 
 run_test "pipe from cat"              6 cat "$SAMPLE" \| "$EXE" -f module=planner
 

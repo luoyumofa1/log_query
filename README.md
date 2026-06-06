@@ -84,7 +84,7 @@ log-query app.log -f level=ERROR --match "message=overflow|failed"
 
 ### 输出模式
 
-默认彩色输出到终端。`plain` 模式在终端无颜色输出，适合重定向到文件或在不支持 ANSI 的终端中使用。JSON/CSV 模式将匹配结果写入本地文件，便于后续处理。
+默认彩色输出到终端。`plain` 模式在终端无颜色输出，适合重定向到文件或在不支持 ANSI 的终端中使用。`summary` 模式按模块和日志级别统计汇总，输出交叉统计表。JSON/CSV 模式将匹配结果写入本地文件，便于后续处理。
 
 ```bash
 # 默认：彩色终端输出
@@ -92,6 +92,11 @@ log-query app.log -f level=ERROR
 
 # 无颜色终端输出（适合管道重定向）
 log-query app.log -f level=ERROR --output plain
+
+# 统计汇总模式（按模块 × 级别统计）
+log-query app.log --output summary
+log-query app.log --output summary -f level=ERROR
+log-query app.log --output summary --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:05"
 
 # JSON 输出（自动生成带时间戳的文件名，如 log-query-result-20260606-133217.json）
 log-query app.log -f level=ERROR --output json
@@ -101,6 +106,21 @@ log-query app.log -f level=ERROR --output csv
 
 # 指定输出文件路径（不自动加时间戳）
 log-query app.log -f level=ERROR --output json --output-file result.json
+```
+
+统计模式输出示例：
+
+```
+Module              TRACE  DEBUG   INFO   WARN  ERROR  FATAL  Total
+----------------------------------------------------------------------
+can_driver              0      1      1      0      1      1      4
+control                 0      0      3      0      0      0      3
+fusion_engine           0      0      3      1      0      0      4
+lidar_driver            0      1      3      1      1      0      6
+planner                 0      0      4      1      1      0      6
+radar_driver            0      0      2      0      0      0      2
+----------------------------------------------------------------------
+Total                   0      2     16      3      3      1     25
 ```
 
 ### 命令行参数
@@ -150,6 +170,6 @@ log-query/
 | 阶段 | 状态 | 内容 |
 |------|:----:|------|
 | Phase 1 | ✅ | 基础框架：字段过滤 + 彩色输出 |
-| Phase 2 | 🔄 | 增强过滤：时间范围 ✅、正则 ✅、统计模式 ⬜ |
+| Phase 2 | ✅ | 增强过滤：时间范围 ✅、正则 ✅、统计模式 ✅ |
 | Phase 3 | 🔄 | 高级功能：JSON/CSV 输出 ✅、Plain 无颜色输出 ✅、Tail 模式 ⬜ |
 | Phase 4 | ⬜ | 优化完善：性能优化、测试覆盖 |

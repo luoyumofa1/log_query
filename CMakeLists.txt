@@ -26,6 +26,7 @@ set(SOURCES
     src/output/csv_renderer.cpp
     src/output/json_renderer.cpp
     src/output/plain_renderer.cpp
+    src/output/summary_renderer.cpp
 )
 
 set(HEADERS

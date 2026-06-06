@@ -177,7 +177,45 @@ if (Test-Path $jsonOut) { Remove-Item $jsonOut -Force }
 if (Test-Path $csvOut) { Remove-Item $csvOut -Force }
 
 Write-Host ""
-Write-Host "[6] Pipe mode (stdin)" -ForegroundColor Yellow
+Write-Host "[6] Summary output mode" -ForegroundColor Yellow
+
+Test-Case "summary output has header row" {
+    $out = Get-Content $sample | & $exe --output summary
+    if ($out[0] -notmatch "^Module") { throw "Expected header starting with 'Module', got $($out[0])" }
+}
+
+Test-Case "summary output has Total row" {
+    $out = Get-Content $sample | & $exe --output summary
+    $totalRow = $out | Where-Object { $_ -match "^Total" }
+    if ($totalRow.Count -eq 0) { throw "Expected 'Total' row in summary output" }
+}
+
+Test-Case "summary output total count matches input" {
+    $out = Get-Content $sample | & $exe --output summary
+    $totalRow = $out | Where-Object { $_ -match "^Total" }
+    if ($totalRow -notmatch "\s+25\s*$") { throw "Expected total of 25 in summary, got: $totalRow" }
+}
+
+Test-Case "summary with filter shows filtered stats" {
+    $out = Get-Content $sample | & $exe --output summary -f level=ERROR
+    $totalRow = $out | Where-Object { $_ -match "^Total" }
+    if ($totalRow -notmatch "\s+3\s*$") { throw "Expected total of 3 in filtered summary, got: $totalRow" }
+}
+
+Test-Case "summary output has separator lines" {
+    $out = Get-Content $sample | & $exe --output summary
+    $separators = $out | Where-Object { $_ -match "^-{10,}" }
+    if ($separators.Count -lt 2) { throw "Expected at least 2 separator lines, got $($separators.Count)" }
+}
+
+Test-Case "summary with time range" {
+    $out = Get-Content $sample | & $exe --output summary --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:07"
+    $totalRow = $out | Where-Object { $_ -match "^Total" }
+    if ($totalRow -notmatch "\s+17\s*$") { throw "Expected total of 17 in time-filtered summary, got: $totalRow" }
+}
+
+Write-Host ""
+Write-Host "[7] Pipe mode (stdin)" -ForegroundColor Yellow
 
 Test-Case "pipe from Get-Content" {
     $out = Get-Content $sample | & $exe -f module=planner

@@ -7,6 +7,7 @@
 #include "output/csv_renderer.h"
 #include "output/json_renderer.h"
 #include "output/plain_renderer.h"
+#include "output/summary_renderer.h"
 #include "parser/line_parser.h"
 #include "util/file_reader.h"
 #include "util/time_parse.h"
@@ -77,7 +78,7 @@ int main(int argc, char** argv) {
                    "End time (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)");
     app.add_option("-m,--match", match_filters,
                    "Regex filter (field=pattern, repeatable)");
-    app.add_option("--output", output_mode, "Output mode: color, plain, json, csv");
+    app.add_option("--output", output_mode, "Output mode: color, plain, summary, json, csv");
     app.add_option("--output-file", output_file,
                    "Output file path (for json/csv mode, auto-generated if omitted)");
 
@@ -137,6 +138,14 @@ int main(int argc, char** argv) {
             std::cerr << "Writing CSV to: " << path << "\n";
         } else if (output_mode == "plain") {
             renderer = std::make_unique<log_query::PlainRenderer>();
+        } else if (output_mode == "summary") {
+            std::vector<std::string> level_order;
+            auto it = format.fields.find(format.level_field);
+            if (it != format.fields.end()) {
+                level_order = it->second.enum_values;
+            }
+            renderer = std::make_unique<log_query::SummaryRenderer>(
+                format.level_field, format.module_field, std::move(level_order));
         } else {
             renderer = std::make_unique<log_query::ColorRenderer>(format.level_field);
         }
