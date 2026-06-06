@@ -3,7 +3,6 @@
 #include <chrono>
 #include <ctime>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 
 namespace log_query {
@@ -44,8 +43,13 @@ static std::string field_to_json_string(const FieldValue& val) {
     return "null";
 }
 
+JsonRenderer::JsonRenderer(std::ostream& os)
+    : Renderer(os)
+{
+}
+
 void JsonRenderer::render_header() {
-    std::cout << "[\n";
+    os_ << "[\n";
     first_ = true;
 }
 
@@ -57,25 +61,25 @@ void JsonRenderer::render_line(const LogLine& line) {
     }
 
     if (!first_) {
-        std::cout << ",\n";
+        os_ << ",\n";
     }
     first_ = false;
 
-    std::cout << "  {\"line\":" << line.line_number;
+    os_ << "  {\"line\":" << line.line_number;
     for (auto& key : field_order_) {
         auto it = line.fields.find(key);
         if (it != line.fields.end()) {
-            std::cout << ",\"" << escape_json(key) << "\":" << field_to_json_string(it->second);
+            os_ << ",\"" << escape_json(key) << "\":" << field_to_json_string(it->second);
         }
     }
-    std::cout << "}";
+    os_ << "}";
 }
 
 void JsonRenderer::render_footer() {
     if (!first_) {
-        std::cout << "\n";
+        os_ << "\n";
     }
-    std::cout << "]\n";
+    os_ << "]\n";
 }
 
 } // namespace log_query

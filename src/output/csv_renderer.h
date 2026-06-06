@@ -9,6 +9,8 @@ namespace log_query {
 
 class CsvRenderer : public Renderer {
 public:
+    explicit CsvRenderer(std::ostream& os);
+
     void render_header() override;
     void render_line(const LogLine& line) override;
     void render_footer() override;

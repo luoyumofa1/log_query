@@ -82,6 +82,24 @@ log-query app.log --match "module=.*driver"
 log-query app.log -f level=ERROR --match "message=overflow|failed"
 ```
 
+### 输出模式
+
+默认彩色输出到终端。JSON/CSV 模式将匹配结果写入本地文件，便于后续处理。
+
+```bash
+# 默认：彩色终端输出
+log-query app.log -f level=ERROR
+
+# JSON 输出（默认写入 log-query-result.json）
+log-query app.log -f level=ERROR --output json
+
+# CSV 输出（默认写入 log-query-result.csv）
+log-query app.log -f level=ERROR --output csv
+
+# 指定输出文件路径
+log-query app.log -f level=ERROR --output json --output-file result.json
+```
+
 ### 命令行参数
 
 | 参数 | 说明 |
@@ -92,7 +110,8 @@ log-query app.log -f level=ERROR --match "message=overflow|failed"
 | `--to` | 结束时间（`YYYY-MM-DD` 或 `YYYY-MM-DD HH:MM:SS`） |
 | `-m, --match` | 正则过滤 `field=pattern`，可重复使用 |
 | `--format-config` | 日志格式配置文件路径（默认 `config/adas_default.json`） |
-| `--output` | 输出模式：`color`（默认） |
+| `--output` | 输出模式：`color`（默认，终端）、`json`（写入文件）、`csv`（写入文件） |
+| `--output-file` | 输出文件路径（json/csv 模式，默认自动生成） |
 
 ### 日志格式配置
 

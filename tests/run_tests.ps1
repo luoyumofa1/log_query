@@ -115,27 +115,43 @@ Test-Case "regex + field filter" {
 Write-Host ""
 Write-Host "[5] Output modes" -ForegroundColor Yellow
 
-Test-Case "JSON output has array wrapper" {
-    $out = Get-Content $sample | & $exe -f level=ERROR --output json
+$jsonOut = Join-Path $ProjectDir "test-output.json"
+$csvOut = Join-Path $ProjectDir "test-output.csv"
+
+Test-Case "JSON output writes file with array wrapper" {
+    if (Test-Path $jsonOut) { Remove-Item $jsonOut -Force }
+    Get-Content $sample | & $exe -f level=ERROR --output json --output-file $jsonOut | Out-Null
+    if (-not (Test-Path $jsonOut)) { throw "JSON output file not created" }
+    $out = Get-Content $jsonOut
     if ($out[0] -ne "[") { throw "Expected '[' on first line, got $($out[0])" }
     if ($out[-1] -ne "]") { throw "Expected ']' on last line, got $($out[-1])" }
 }
 
 Test-Case "JSON output has correct number of entries" {
-    $out = Get-Content $sample | & $exe -f level=ERROR --output json
+    if (Test-Path $jsonOut) { Remove-Item $jsonOut -Force }
+    Get-Content $sample | & $exe -f level=ERROR --output json --output-file $jsonOut | Out-Null
+    $out = Get-Content $jsonOut
     $dataLines = $out | Where-Object { $_ -match '"line":' }
     if ($dataLines.Count -ne 3) { throw "Expected 3 data lines, got $($dataLines.Count)" }
 }
 
-Test-Case "CSV output has header" {
-    $out = Get-Content $sample | & $exe -f level=ERROR --output csv
+Test-Case "CSV output writes file with header" {
+    if (Test-Path $csvOut) { Remove-Item $csvOut -Force }
+    Get-Content $sample | & $exe -f level=ERROR --output csv --output-file $csvOut | Out-Null
+    if (-not (Test-Path $csvOut)) { throw "CSV output file not created" }
+    $out = Get-Content $csvOut
     if ($out[0] -notmatch "^line,") { throw "Expected CSV header starting with 'line,', got $($out[0])" }
 }
 
 Test-Case "CSV output has correct row count" {
-    $out = Get-Content $sample | & $exe -f level=ERROR --output csv
+    if (Test-Path $csvOut) { Remove-Item $csvOut -Force }
+    Get-Content $sample | & $exe -f level=ERROR --output csv --output-file $csvOut | Out-Null
+    $out = Get-Content $csvOut
     if ($out.Count -ne 4) { throw "Expected 4 lines (1 header + 3 data), got $($out.Count)" }
 }
+
+if (Test-Path $jsonOut) { Remove-Item $jsonOut -Force }
+if (Test-Path $csvOut) { Remove-Item $csvOut -Force }
 
 Write-Host ""
 Write-Host "[6] Pipe mode (stdin)" -ForegroundColor Yellow

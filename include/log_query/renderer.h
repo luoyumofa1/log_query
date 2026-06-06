@@ -2,14 +2,20 @@
 
 #include "log_query/log_line.h"
 
+#include <iostream>
+
 namespace log_query {
 
 class Renderer {
 public:
+    explicit Renderer(std::ostream& os = std::cout) : os_(os) {}
     virtual ~Renderer() = default;
     virtual void render_header() {}
     virtual void render_line(const LogLine& line) = 0;
     virtual void render_footer() {}
+
+protected:
+    std::ostream& os_;
 };
 
 } // namespace log_query

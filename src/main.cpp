@@ -12,6 +12,7 @@
 
 #include <CLI11.hpp>
 #include <chrono>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -36,6 +37,7 @@ int main(int argc, char** argv) {
     std::string to_time;
     std::vector<std::string> match_filters;
     std::string output_mode = "color";
+    std::string output_file;
 
     app.add_option("file", log_file, "Log file path (use - for stdin)");
     app.add_option("--format-config", format_config,
@@ -49,6 +51,8 @@ int main(int argc, char** argv) {
     app.add_option("-m,--match", match_filters,
                    "Regex filter (field=pattern, repeatable)");
     app.add_option("--output", output_mode, "Output mode: color, json, csv");
+    app.add_option("--output-file", output_file,
+                   "Output file path (for json/csv mode, auto-generated if omitted)");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -83,11 +87,27 @@ int main(int argc, char** argv) {
             chain.add(std::make_unique<log_query::RegexFilter>(field, pattern));
         }
 
+        std::unique_ptr<std::ofstream> file_stream;
         std::unique_ptr<log_query::Renderer> renderer;
+
         if (output_mode == "json") {
-            renderer = std::make_unique<log_query::JsonRenderer>();
+            std::string path = output_file;
+            if (path.empty()) path = "log-query-result.json";
+            file_stream = std::make_unique<std::ofstream>(path);
+            if (!file_stream->is_open()) {
+                throw std::runtime_error("Failed to create output file: " + path);
+            }
+            renderer = std::make_unique<log_query::JsonRenderer>(*file_stream);
+            std::cerr << "Writing JSON to: " << path << "\n";
         } else if (output_mode == "csv") {
-            renderer = std::make_unique<log_query::CsvRenderer>();
+            std::string path = output_file;
+            if (path.empty()) path = "log-query-result.csv";
+            file_stream = std::make_unique<std::ofstream>(path);
+            if (!file_stream->is_open()) {
+                throw std::runtime_error("Failed to create output file: " + path);
+            }
+            renderer = std::make_unique<log_query::CsvRenderer>(*file_stream);
+            std::cerr << "Writing CSV to: " << path << "\n";
         } else {
             renderer = std::make_unique<log_query::ColorRenderer>(format.level_field);
         }

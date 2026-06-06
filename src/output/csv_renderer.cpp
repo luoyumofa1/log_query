@@ -3,10 +3,14 @@
 #include <chrono>
 #include <ctime>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 
 namespace log_query {
+
+CsvRenderer::CsvRenderer(std::ostream& os)
+    : Renderer(os)
+{
+}
 
 std::string CsvRenderer::escape_csv(const std::string& s) {
     bool needs_quote = false;
@@ -56,24 +60,24 @@ void CsvRenderer::render_line(const LogLine& line) {
         for (auto& [k, v] : line.fields) {
             field_order_.push_back(k);
         }
-        std::cout << "line";
+        os_ << "line";
         for (auto& key : field_order_) {
-            std::cout << "," << escape_csv(key);
+            os_ << "," << escape_csv(key);
         }
-        std::cout << "\n";
+        os_ << "\n";
         header_written_ = true;
     }
 
-    std::cout << line.line_number;
+    os_ << line.line_number;
     for (auto& key : field_order_) {
         auto it = line.fields.find(key);
         if (it != line.fields.end()) {
-            std::cout << "," << escape_csv(field_to_csv_string(it->second));
+            os_ << "," << escape_csv(field_to_csv_string(it->second));
         } else {
-            std::cout << ",";
+            os_ << ",";
         }
     }
-    std::cout << "\n";
+    os_ << "\n";
 }
 
 void CsvRenderer::render_footer() {

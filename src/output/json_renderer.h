@@ -9,6 +9,8 @@ namespace log_query {
 
 class JsonRenderer : public Renderer {
 public:
+    explicit JsonRenderer(std::ostream& os);
+
     void render_header() override;
     void render_line(const LogLine& line) override;
     void render_footer() override;

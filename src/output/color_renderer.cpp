@@ -8,7 +8,8 @@
 namespace log_query {
 
 ColorRenderer::ColorRenderer(std::string level_field)
-    : level_field_(std::move(level_field))
+    : Renderer(std::cout)
+    , level_field_(std::move(level_field))
 {
 }
 
@@ -24,7 +25,7 @@ void ColorRenderer::render_line(const LogLine& line) {
     const char* color = level_color(level);
 
     std::string formatted = format_line(line);
-    std::cout << ansi::colorize(formatted, color) << "\n";
+    os_ << ansi::colorize(formatted, color) << "\n";
 }
 
 const char* ColorRenderer::level_color(const std::string& level) {

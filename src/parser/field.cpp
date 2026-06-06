@@ -17,8 +17,15 @@ std::optional<FieldValue> convert_field(
     const std::vector<std::string>& enum_values)
 {
     switch (type) {
-    case FieldType::String:
-        return std::string(raw);
+    case FieldType::String: {
+        std::string s(raw);
+        size_t start = s.find_first_not_of(" \t");
+        size_t end = s.find_last_not_of(" \t");
+        if (start != std::string::npos && end != std::string::npos) {
+            return s.substr(start, end - start + 1);
+        }
+        return s;
+    }
 
     case FieldType::Int: {
         std::string s(raw);
@@ -52,6 +59,11 @@ std::optional<FieldValue> convert_field(
 
     case FieldType::Enum: {
         std::string upper(raw);
+        size_t start = upper.find_first_not_of(" \t");
+        size_t end = upper.find_last_not_of(" \t");
+        if (start != std::string::npos && end != std::string::npos) {
+            upper = upper.substr(start, end - start + 1);
+        }
         std::transform(upper.begin(), upper.end(), upper.begin(),
                        [](unsigned char c) { return std::toupper(c); });
         for (auto& v : enum_values) {
