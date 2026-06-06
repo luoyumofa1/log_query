@@ -23,6 +23,8 @@ set(SOURCES
     src/filter/regex_filter.cpp
     src/filter/time_range_filter.cpp
     src/output/color_renderer.cpp
+    src/output/csv_renderer.cpp
+    src/output/json_renderer.cpp
 )
 
 set(HEADERS

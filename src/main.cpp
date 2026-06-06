@@ -4,6 +4,8 @@
 #include "filter/regex_filter.h"
 #include "filter/time_range_filter.h"
 #include "output/color_renderer.h"
+#include "output/csv_renderer.h"
+#include "output/json_renderer.h"
 #include "parser/line_parser.h"
 #include "util/file_reader.h"
 #include "util/time_parse.h"
@@ -82,11 +84,11 @@ int main(int argc, char** argv) {
         }
 
         std::unique_ptr<log_query::Renderer> renderer;
-        if (output_mode == "color") {
-            renderer = std::make_unique<log_query::ColorRenderer>(format.level_field);
+        if (output_mode == "json") {
+            renderer = std::make_unique<log_query::JsonRenderer>();
+        } else if (output_mode == "csv") {
+            renderer = std::make_unique<log_query::CsvRenderer>();
         } else {
-            std::cerr << "Warning: output mode '" << output_mode
-                      << "' not yet implemented, falling back to color\n";
             renderer = std::make_unique<log_query::ColorRenderer>(format.level_field);
         }
 

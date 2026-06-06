@@ -113,7 +113,32 @@ Test-Case "regex + field filter" {
 }
 
 Write-Host ""
-Write-Host "[5] Pipe mode (stdin)" -ForegroundColor Yellow
+Write-Host "[5] Output modes" -ForegroundColor Yellow
+
+Test-Case "JSON output has array wrapper" {
+    $out = Get-Content $sample | & $exe -f level=ERROR --output json
+    if ($out[0] -ne "[") { throw "Expected '[' on first line, got $($out[0])" }
+    if ($out[-1] -ne "]") { throw "Expected ']' on last line, got $($out[-1])" }
+}
+
+Test-Case "JSON output has correct number of entries" {
+    $out = Get-Content $sample | & $exe -f level=ERROR --output json
+    $dataLines = $out | Where-Object { $_ -match '"line":' }
+    if ($dataLines.Count -ne 3) { throw "Expected 3 data lines, got $($dataLines.Count)" }
+}
+
+Test-Case "CSV output has header" {
+    $out = Get-Content $sample | & $exe -f level=ERROR --output csv
+    if ($out[0] -notmatch "^line,") { throw "Expected CSV header starting with 'line,', got $($out[0])" }
+}
+
+Test-Case "CSV output has correct row count" {
+    $out = Get-Content $sample | & $exe -f level=ERROR --output csv
+    if ($out.Count -ne 4) { throw "Expected 4 lines (1 header + 3 data), got $($out.Count)" }
+}
+
+Write-Host ""
+Write-Host "[6] Pipe mode (stdin)" -ForegroundColor Yellow
 
 Test-Case "pipe from Get-Content" {
     $out = Get-Content $sample | & $exe -f module=planner
