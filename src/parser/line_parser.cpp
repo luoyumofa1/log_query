@@ -81,6 +81,9 @@ std::optional<LogLine> LineParser::parse(std::string_view raw, int64_t line_numb
             }
 
             std::string_view field_value = raw.substr(pos, end - pos);
+            while (!field_value.empty() && std::isspace(static_cast<unsigned char>(field_value.back()))) {
+                field_value.remove_suffix(1);
+            }
 
             auto it = config_.fields.find(tok.value);
             if (it == config_.fields.end()) {
@@ -114,9 +117,30 @@ size_t LineParser::find_next_fixed(std::string_view raw, size_t start, size_t to
                 ++fi;
             }
             if (fi < fixed.size()) {
-                auto found = raw.find(fixed[fi], start);
-                if (found != std::string_view::npos) {
-                    return found;
+                size_t prefix_len = 1;
+                while (fi + prefix_len < fixed.size() &&
+                       !std::isspace(static_cast<unsigned char>(fixed[fi + prefix_len]))) {
+                    ++prefix_len;
+                }
+                if (prefix_len >= 2) {
+                    std::string_view prefix(fixed.data() + fi, prefix_len);
+                    auto found = raw.find(prefix, start);
+                    if (found != std::string_view::npos) {
+                        return found;
+                    }
+                } else {
+                    auto found = raw.find(fixed[fi], start);
+                    if (found != std::string_view::npos) {
+                        return found;
+                    }
+                }
+            } else {
+                size_t pos = start;
+                while (pos < raw.size() && !std::isspace(static_cast<unsigned char>(raw[pos]))) {
+                    ++pos;
+                }
+                if (pos < raw.size()) {
+                    return pos;
                 }
             }
         }

@@ -1,4 +1,5 @@
 #include "config/log_format.h"
+#include "filter/compare_filter.h"
 #include "filter/field_filter.h"
 #include "filter/filter_chain.h"
 #include "filter/regex_filter.h"
@@ -23,13 +24,38 @@
 #include <string>
 #include <vector>
 
-static std::pair<std::string, std::string> parse_filter(const std::string& raw) {
-    auto eq = raw.find('=');
-    if (eq == std::string::npos) {
-        throw std::runtime_error("Invalid filter format: '" + raw +
-                                 "'. Expected field=value");
+static std::unique_ptr<log_query::Filter> make_filter(const std::string& raw) {
+    static const char* ops[] = { ">=", "<=", "!=", ">", "<", "=" };
+    for (auto op : ops) {
+        auto pos = raw.find(op);
+        if (pos != std::string::npos && pos > 0) {
+            std::string field = raw.substr(0, pos);
+            std::string value = raw.substr(pos + std::char_traits<char>::length(op));
+
+            if (std::string(op) == "=") {
+                return std::make_unique<log_query::FieldEqualFilter>(field, value);
+            }
+
+            double threshold = 0;
+            try {
+                threshold = std::stod(value);
+            } catch (...) {
+                throw std::runtime_error("Invalid numeric value in filter: '" + raw +
+                                         "'. Expected numeric threshold after " + std::string(op));
+            }
+
+            log_query::CompareFilter::Op cmp_op;
+            if (std::string(op) == ">")       cmp_op = log_query::CompareFilter::Op::Greater;
+            else if (std::string(op) == ">=") cmp_op = log_query::CompareFilter::Op::GreaterEqual;
+            else if (std::string(op) == "<")  cmp_op = log_query::CompareFilter::Op::Less;
+            else if (std::string(op) == "<=") cmp_op = log_query::CompareFilter::Op::LessEqual;
+            else                               cmp_op = log_query::CompareFilter::Op::NotEqual;
+
+            return std::make_unique<log_query::CompareFilter>(field, cmp_op, threshold);
+        }
     }
-    return {raw.substr(0, eq), raw.substr(eq + 1)};
+    throw std::runtime_error("Invalid filter format: '" + raw +
+                             "'. Expected field=value or field>value, etc.");
 }
 
 static std::string make_timestamped_filename(const std::string& ext) {
@@ -96,8 +122,7 @@ int main(int argc, char** argv) {
 
         log_query::FilterChain chain;
         for (auto& f : filters) {
-            auto [field, value] = parse_filter(f);
-            chain.add(std::make_unique<log_query::FieldEqualFilter>(field, value));
+            chain.add(make_filter(f));
         }
 
         if (!from_time.empty() || !to_time.empty()) {
@@ -111,8 +136,13 @@ int main(int argc, char** argv) {
         }
 
         for (auto& m : match_filters) {
-            auto [field, pattern] = parse_filter(m);
-            chain.add(std::make_unique<log_query::RegexFilter>(field, pattern));
+            auto eq = m.find('=');
+            if (eq == std::string::npos) {
+                throw std::runtime_error("Invalid match format: '" + m +
+                                         "'. Expected field=pattern");
+            }
+            chain.add(std::make_unique<log_query::RegexFilter>(
+                m.substr(0, eq), m.substr(eq + 1)));
         }
 
         std::unique_ptr<std::ofstream> file_stream;

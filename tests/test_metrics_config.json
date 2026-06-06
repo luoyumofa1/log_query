@@ -1,0 +1,29 @@
+{
+  "name": "web_service",
+  "level_field": "level",
+  "module_field": "service",
+  "pattern": "[{timestamp}] [{level}] [{service}] status={status} time={resp_time} {message}",
+  "fields": {
+    "timestamp": {
+      "type": "datetime",
+      "format": "%Y-%m-%d %H:%M:%S.%f"
+    },
+    "level": {
+      "type": "enum",
+      "values": ["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"]
+    },
+    "service": {
+      "type": "string"
+    },
+    "status": {
+      "type": "int"
+    },
+    "resp_time": {
+      "type": "float"
+    },
+    "message": {
+      "type": "string",
+      "greedy": true
+    }
+  }
+}

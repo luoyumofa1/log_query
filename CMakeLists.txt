@@ -19,6 +19,7 @@ set(SOURCES
     src/parser/field.cpp
     src/parser/line_parser.cpp
     src/filter/filter_chain.cpp
+    src/filter/compare_filter.cpp
     src/filter/field_filter.cpp
     src/filter/regex_filter.cpp
     src/filter/time_range_filter.cpp
@@ -37,6 +38,7 @@ set(HEADERS
     src/parser/field.h
     src/parser/line_parser.h
     src/filter/filter_chain.h
+    src/filter/compare_filter.h
     src/filter/field_filter.h
     src/filter/regex_filter.h
     src/filter/time_range_filter.h

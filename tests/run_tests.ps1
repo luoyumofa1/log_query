@@ -215,7 +215,79 @@ Test-Case "summary with time range" {
 }
 
 Write-Host ""
-Write-Host "[7] Pipe mode (stdin)" -ForegroundColor Yellow
+Write-Host "[7] Numeric comparison filtering" -ForegroundColor Yellow
+
+$metricsSample = Join-Path $ScriptDir "sample_metrics.log"
+$metricsConfig = Join-Path $ScriptDir "test_metrics_config.json"
+
+Test-Case "int field greater than" {
+    $out = Get-Content $metricsSample | & $exe --format-config $metricsConfig -f "status>400" --output plain
+    if ($out.Count -ne 6) { throw "Expected 6 lines, got $($out.Count)" }
+}
+
+Test-Case "int field less than" {
+    $out = Get-Content $metricsSample | & $exe --format-config $metricsConfig -f "status<300" --output plain
+    if ($out.Count -ne 9) { throw "Expected 9 lines, got $($out.Count)" }
+}
+
+Test-Case "float field greater than" {
+    $out = Get-Content $metricsSample | & $exe --format-config $metricsConfig -f "resp_time>100" --output plain
+    if ($out.Count -ne 5) { throw "Expected 5 lines, got $($out.Count)" }
+}
+
+Test-Case "float field less than or equal" {
+    $out = Get-Content $metricsSample | & $exe --format-config $metricsConfig -f "resp_time<=5.0" --output plain
+    if ($out.Count -ne 7) { throw "Expected 7 lines, got $($out.Count)" }
+}
+
+Test-Case "int not equal with string filter" {
+    $out = Get-Content $metricsSample | & $exe --format-config $metricsConfig -f "status!=200" -f "service=payment" --output plain
+    if ($out.Count -ne 4) { throw "Expected 4 lines, got $($out.Count)" }
+}
+
+Test-Case "comparison + level filter combined" {
+    $out = Get-Content $metricsSample | & $exe --format-config $metricsConfig -f "status>=500" -f "level=ERROR" --output plain
+    if ($out.Count -ne 3) { throw "Expected 3 lines, got $($out.Count)" }
+}
+
+Test-Case "comparison with summary output" {
+    $out = Get-Content $metricsSample | & $exe --format-config $metricsConfig -f "resp_time>100" --output summary
+    $totalRow = $out | Where-Object { $_ -match "^Total" }
+    if ($totalRow -notmatch "\s+5\s*$") { throw "Expected total of 5 in comparison+summary, got: $totalRow" }
+}
+
+Test-Case "comparison on string field filters out all lines" {
+    $out = Get-Content $metricsSample | & $exe --format-config $metricsConfig -f "service>0" --output plain
+    if ($out.Count -ne 0) { throw "Expected 0 lines when comparing string field, got $($out.Count)" }
+}
+
+Test-Case "comparison on non-existent field filters out all lines" {
+    $out = Get-Content $metricsSample | & $exe --format-config $metricsConfig -f "nonexistent>0" --output plain
+    if ($out.Count -ne 0) { throw "Expected 0 lines when comparing non-existent field, got $($out.Count)" }
+}
+
+Test-Case "int field equal match" {
+    $out = Get-Content $metricsSample | & $exe --format-config $metricsConfig -f "status=200" --output plain
+    if ($out.Count -ne 7) { throw "Expected 7 lines, got $($out.Count)" }
+}
+
+Test-Case "int field equal no match" {
+    $out = Get-Content $metricsSample | & $exe --format-config $metricsConfig -f "status=999" --output plain
+    if ($out.Count -ne 0) { throw "Expected 0 lines, got $($out.Count)" }
+}
+
+Test-Case "float field equal match" {
+    $out = Get-Content $metricsSample | & $exe --format-config $metricsConfig -f "resp_time=0.5" --output plain
+    if ($out.Count -ne 1) { throw "Expected 1 line, got $($out.Count)" }
+}
+
+Test-Case "int equal combined with level filter" {
+    $out = Get-Content $metricsSample | & $exe --format-config $metricsConfig -f "status=200" -f "level=DEBUG" --output plain
+    if ($out.Count -ne 2) { throw "Expected 2 lines, got $($out.Count)" }
+}
+
+Write-Host ""
+Write-Host "[8] Pipe mode (stdin)" -ForegroundColor Yellow
 
 Test-Case "pipe from Get-Content" {
     $out = Get-Content $sample | & $exe -f module=planner

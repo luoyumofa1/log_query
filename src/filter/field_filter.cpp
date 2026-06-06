@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 
 namespace log_query {
 
@@ -15,17 +16,42 @@ bool FieldEqualFilter::match(const LogLine& line) const {
     auto it = line.fields.find(field_);
     if (it == line.fields.end()) return false;
 
-    if (!std::holds_alternative<std::string>(it->second)) return false;
+    if (std::holds_alternative<int64_t>(it->second)) {
+        try {
+            size_t pos = 0;
+            int64_t expected = std::stoll(value_, &pos);
+            if (pos != value_.size()) return false;
+            return std::get<int64_t>(it->second) == expected;
+        } catch (...) {
+            return false;
+        }
+    }
 
-    std::string field_val = std::get<std::string>(it->second);
-    std::string expected = value_;
+    if (std::holds_alternative<double>(it->second)) {
+        try {
+            size_t pos = 0;
+            double expected = std::stod(value_, &pos);
+            if (pos != value_.size()) return false;
+            double actual = std::get<double>(it->second);
+            return std::abs(actual - expected) < 1e-9;
+        } catch (...) {
+            return false;
+        }
+    }
 
-    std::transform(field_val.begin(), field_val.end(), field_val.begin(),
-                   [](unsigned char c) { return std::toupper(c); });
-    std::transform(expected.begin(), expected.end(), expected.begin(),
-                   [](unsigned char c) { return std::toupper(c); });
+    if (std::holds_alternative<std::string>(it->second)) {
+        std::string field_val = std::get<std::string>(it->second);
+        std::string expected = value_;
 
-    return field_val == expected;
+        std::transform(field_val.begin(), field_val.end(), field_val.begin(),
+                       [](unsigned char c) { return std::toupper(c); });
+        std::transform(expected.begin(), expected.end(), expected.begin(),
+                       [](unsigned char c) { return std::toupper(c); });
+
+        return field_val == expected;
+    }
+
+    return false;
 }
 
 std::string FieldEqualFilter::describe() const {

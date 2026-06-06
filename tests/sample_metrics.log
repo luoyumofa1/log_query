@@ -1,0 +1,16 @@
+[2025-06-06 09:00:00.100] [INFO ] [auth]     status=200 time=12.5 User login success
+[2025-06-06 09:00:00.200] [INFO ] [gateway]  status=200 time=3.2 Request routed to payment
+[2025-06-06 09:00:00.300] [WARN ] [payment]  status=202 time=850.3 Payment processing slow
+[2025-06-06 09:00:01.100] [ERROR] [payment]  status=502 time=1200.8 Upstream timeout
+[2025-06-06 09:00:01.200] [INFO ] [gateway]  status=200 time=8.1 Health check passed
+[2025-06-06 09:00:01.300] [DEBUG] [auth]     status=200 time=1.5 Token validated
+[2025-06-06 09:00:02.100] [ERROR] [gateway]  status=504 time=3000.0 Backend unreachable
+[2025-06-06 09:00:02.200] [WARN ] [auth]     status=401 time=5.0 Invalid token attempt
+[2025-06-06 09:00:02.300] [INFO ] [payment]  status=200 time=45.6 Transaction completed
+[2025-06-06 09:00:03.100] [INFO ] [gateway]  status=301 time=2.0 Redirect to HTTPS
+[2025-06-06 09:00:03.200] [ERROR] [payment]  status=500 time=600.5 Internal settlement error
+[2025-06-06 09:00:03.300] [WARN ] [gateway]  status=429 time=0.8 Rate limit triggered
+[2025-06-06 09:00:04.100] [INFO ] [auth]     status=200 time=15.0 Session refreshed
+[2025-06-06 09:00:04.200] [FATAL] [payment]  status=503 time=5000.0 Database connection lost
+[2025-06-06 09:00:04.300] [DEBUG] [gateway]  status=200 time=0.5 Cache hit
+[2025-06-06 09:00:05.100] [INFO ] [auth]     status=204 time=3.0 Logout completed
