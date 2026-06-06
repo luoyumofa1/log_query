@@ -20,6 +20,7 @@ set(SOURCES
     src/parser/line_parser.cpp
     src/filter/filter_chain.cpp
     src/filter/field_filter.cpp
+    src/filter/time_range_filter.cpp
     src/output/color_renderer.cpp
 )
 

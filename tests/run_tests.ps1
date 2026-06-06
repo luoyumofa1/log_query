@@ -72,7 +72,30 @@ Test-Case "case insensitive level matching" {
 }
 
 Write-Host ""
-Write-Host "[3] Pipe mode (stdin)" -ForegroundColor Yellow
+Write-Host "[3] Time range filtering" -ForegroundColor Yellow
+
+Test-Case "filter by --from and --to" {
+    $out = Get-Content $sample | & $exe --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:05"
+    if ($out.Count -ne 6) { throw "Expected 6 lines, got $($out.Count)" }
+}
+
+Test-Case "filter by --from only" {
+    $out = Get-Content $sample | & $exe --from "2024-01-15 08:00:07"
+    if ($out.Count -ne 8) { throw "Expected 8 lines, got $($out.Count)" }
+}
+
+Test-Case "filter by --to only" {
+    $out = Get-Content $sample | & $exe --to "2024-01-15 08:00:01"
+    if ($out.Count -ne 6) { throw "Expected 6 lines, got $($out.Count)" }
+}
+
+Test-Case "time range + field filter" {
+    $out = Get-Content $sample | & $exe --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:05" -f level=ERROR
+    if ($out.Count -ne 1) { throw "Expected 1 line, got $($out.Count)" }
+}
+
+Write-Host ""
+Write-Host "[4] Pipe mode (stdin)" -ForegroundColor Yellow
 
 Test-Case "pipe from Get-Content" {
     $out = Get-Content $sample | & $exe -f module=planner

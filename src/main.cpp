@@ -1,11 +1,14 @@
 #include "config/log_format.h"
 #include "filter/field_filter.h"
 #include "filter/filter_chain.h"
+#include "filter/time_range_filter.h"
 #include "output/color_renderer.h"
 #include "parser/line_parser.h"
 #include "util/file_reader.h"
+#include "util/time_parse.h"
 
 #include <CLI11.hpp>
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -26,6 +29,8 @@ int main(int argc, char** argv) {
     std::string log_file = "-";
     std::string format_config;
     std::vector<std::string> filters;
+    std::string from_time;
+    std::string to_time;
     std::string output_mode = "color";
 
     app.add_option("file", log_file, "Log file path (use - for stdin)");
@@ -33,6 +38,10 @@ int main(int argc, char** argv) {
                    "Path to log format JSON config file");
     app.add_option("-f,--filter", filters,
                    "Field filter (field=value, repeatable)");
+    app.add_option("--from", from_time,
+                   "Start time (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)");
+    app.add_option("--to", to_time,
+                   "End time (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)");
     app.add_option("--output", output_mode, "Output mode: color, json, csv");
 
     CLI11_PARSE(app, argc, argv);
@@ -51,6 +60,16 @@ int main(int argc, char** argv) {
         for (auto& f : filters) {
             auto [field, value] = parse_filter(f);
             chain.add(std::make_unique<log_query::FieldEqualFilter>(field, value));
+        }
+
+        if (!from_time.empty() || !to_time.empty()) {
+            auto from = from_time.empty()
+                ? std::chrono::system_clock::time_point{}
+                : log_query::parse_user_time(from_time);
+            auto to = to_time.empty()
+                ? std::chrono::system_clock::time_point::max()
+                : log_query::parse_user_time(to_time);
+            chain.add(std::make_unique<log_query::TimeRangeFilter>(from, to));
         }
 
         std::unique_ptr<log_query::Renderer> renderer;
