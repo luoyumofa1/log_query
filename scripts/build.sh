@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BUILD_TYPE="${1:-Release}"
+BUILD_TYPE="Release"
 CLEAN=false
 GENERATOR=""
 
@@ -68,10 +68,18 @@ fi
 
 echo -e "${YELLOW}[2/4] Configuring CMake...${NC}"
 cmake -B build -DCMAKE_BUILD_TYPE="$BUILD_TYPE" ${GENERATOR:+-G "$GENERATOR"}
+if [ $? -ne 0 ]; then
+    echo -e "${RED}ERROR: CMake configuration failed!${NC}"
+    exit 1
+fi
 echo ""
 
 echo -e "${YELLOW}[3/4] Building...${NC}"
 cmake --build build -j"$NPROC" --config "$BUILD_TYPE"
+if [ $? -ne 0 ]; then
+    echo -e "${RED}ERROR: Build failed!${NC}"
+    exit 1
+fi
 echo ""
 
 echo -e "${GREEN}[4/4] Build complete!${NC}"
@@ -85,4 +93,4 @@ fi
 echo ""
 
 echo -e "${CYAN}Quick test:${NC}"
-echo -e "  echo '[2024-01-15 14:32:01.123] [ERROR] [lidar] [rx] timeout' | ${EXE_PATH} --module lidar --level ERROR"
+echo -e "  echo '[2024-01-15 14:32:01.123] [ERROR] [lidar] [rx] timeout' | ${EXE_PATH} -f module=lidar -f level=ERROR"

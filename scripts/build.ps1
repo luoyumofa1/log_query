@@ -85,4 +85,4 @@ Write-Host "  Binary: $exePath" -ForegroundColor Green
 Write-Host ""
 
 Write-Host "Quick test:" -ForegroundColor Cyan
-Write-Host "  echo '[2024-01-15 14:32:01.123] [ERROR] [lidar] [rx] timeout' | $exePath --module lidar --level ERROR" -ForegroundColor White
+Write-Host "  echo '[2024-01-15 14:32:01.123] [ERROR] [lidar] [rx] timeout' | $exePath -f module=lidar -f level=ERROR" -ForegroundColor White
