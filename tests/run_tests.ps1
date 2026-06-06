@@ -95,7 +95,25 @@ Test-Case "time range + field filter" {
 }
 
 Write-Host ""
-Write-Host "[4] Pipe mode (stdin)" -ForegroundColor Yellow
+Write-Host "[4] Regex filtering" -ForegroundColor Yellow
+
+Test-Case "regex on message field" {
+    $out = Get-Content $sample | & $exe --match "message=timeout|overflow"
+    if ($out.Count -ne 3) { throw "Expected 3 lines, got $($out.Count)" }
+}
+
+Test-Case "regex on module field" {
+    $out = Get-Content $sample | & $exe --match "module=.*driver"
+    if ($out.Count -ne 12) { throw "Expected 12 lines, got $($out.Count)" }
+}
+
+Test-Case "regex + field filter" {
+    $out = Get-Content $sample | & $exe -f level=ERROR --match "message=overflow|failed"
+    if ($out.Count -ne 2) { throw "Expected 2 lines, got $($out.Count)" }
+}
+
+Write-Host ""
+Write-Host "[5] Pipe mode (stdin)" -ForegroundColor Yellow
 
 Test-Case "pipe from Get-Content" {
     $out = Get-Content $sample | & $exe -f module=planner

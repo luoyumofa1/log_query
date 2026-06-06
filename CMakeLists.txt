@@ -20,6 +20,7 @@ set(SOURCES
     src/parser/line_parser.cpp
     src/filter/filter_chain.cpp
     src/filter/field_filter.cpp
+    src/filter/regex_filter.cpp
     src/filter/time_range_filter.cpp
     src/output/color_renderer.cpp
 )
@@ -33,9 +34,12 @@ set(HEADERS
     src/parser/line_parser.h
     src/filter/filter_chain.h
     src/filter/field_filter.h
+    src/filter/regex_filter.h
+    src/filter/time_range_filter.h
     src/output/color_renderer.h
     src/util/ansi.h
     src/util/file_reader.h
+    src/util/time_parse.h
 )
 
 add_executable(log-query ${SOURCES} ${HEADERS})
