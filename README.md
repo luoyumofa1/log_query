@@ -90,13 +90,13 @@ log-query app.log -f level=ERROR --match "message=overflow|failed"
 # 默认：彩色终端输出
 log-query app.log -f level=ERROR
 
-# JSON 输出（默认写入 log-query-result.json）
+# JSON 输出（自动生成带时间戳的文件名，如 log-query-result-20260606-133217.json）
 log-query app.log -f level=ERROR --output json
 
-# CSV 输出（默认写入 log-query-result.csv）
+# CSV 输出（自动生成带时间戳的文件名，如 log-query-result-20260606-133217.csv）
 log-query app.log -f level=ERROR --output csv
 
-# 指定输出文件路径
+# 指定输出文件路径（不自动加时间戳）
 log-query app.log -f level=ERROR --output json --output-file result.json
 ```
 
@@ -111,7 +111,7 @@ log-query app.log -f level=ERROR --output json --output-file result.json
 | `-m, --match` | 正则过滤 `field=pattern`，可重复使用 |
 | `--format-config` | 日志格式配置文件路径（默认 `config/adas_default.json`） |
 | `--output` | 输出模式：`color`（默认，终端）、`json`（写入文件）、`csv`（写入文件） |
-| `--output-file` | 输出文件路径（json/csv 模式，默认自动生成） |
+| `--output-file` | 输出文件路径（json/csv 模式，不指定则自动生成带时间戳的文件名） |
 
 ### 日志格式配置
 

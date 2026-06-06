@@ -12,9 +12,12 @@
 
 #include <CLI11.hpp>
 #include <chrono>
+#include <ctime>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -25,6 +28,29 @@ static std::pair<std::string, std::string> parse_filter(const std::string& raw) 
                                  "'. Expected field=value");
     }
     return {raw.substr(0, eq), raw.substr(eq + 1)};
+}
+
+static std::string make_timestamped_filename(const std::string& ext) {
+    auto now = std::chrono::system_clock::now();
+    auto time_t_now = std::chrono::system_clock::to_time_t(now);
+    std::tm tm_now;
+#ifdef _WIN32
+    localtime_s(&tm_now, &time_t_now);
+#else
+    localtime_r(&time_t_now, &tm_now);
+#endif
+    std::ostringstream oss;
+    oss << "log-query-result-"
+        << std::setfill('0')
+        << std::setw(4) << (tm_now.tm_year + 1900)
+        << std::setw(2) << (tm_now.tm_mon + 1)
+        << std::setw(2) << tm_now.tm_mday
+        << "-"
+        << std::setw(2) << tm_now.tm_hour
+        << std::setw(2) << tm_now.tm_min
+        << std::setw(2) << tm_now.tm_sec
+        << "." << ext;
+    return oss.str();
 }
 
 int main(int argc, char** argv) {
@@ -92,7 +118,7 @@ int main(int argc, char** argv) {
 
         if (output_mode == "json") {
             std::string path = output_file;
-            if (path.empty()) path = "log-query-result.json";
+            if (path.empty()) path = make_timestamped_filename("json");
             file_stream = std::make_unique<std::ofstream>(path);
             if (!file_stream->is_open()) {
                 throw std::runtime_error("Failed to create output file: " + path);
@@ -101,7 +127,7 @@ int main(int argc, char** argv) {
             std::cerr << "Writing JSON to: " << path << "\n";
         } else if (output_mode == "csv") {
             std::string path = output_file;
-            if (path.empty()) path = "log-query-result.csv";
+            if (path.empty()) path = make_timestamped_filename("csv");
             file_stream = std::make_unique<std::ofstream>(path);
             if (!file_stream->is_open()) {
                 throw std::runtime_error("Failed to create output file: " + path);

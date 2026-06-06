@@ -10,5 +10,5 @@ build/
 *~
 .DS_Store
 Thumbs.db
-log-query-result.json
-log-query-result.csv
+log-query-result*.json
+log-query-result*.csv
