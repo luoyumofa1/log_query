@@ -1,6 +1,7 @@
 {
   "name": "adas_default",
   "level_field": "level",
+  "module_field": "module",
   "pattern": "[{timestamp}] [{level}] [{module}] [{thread}] {message}",
   "fields": {
     "timestamp": {

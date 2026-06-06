@@ -27,6 +27,7 @@ struct LogFormatConfig {
     std::string name;
     std::string pattern;
     std::string level_field;
+    std::string module_field;
     std::map<std::string, FieldConfig> fields;
 };
 

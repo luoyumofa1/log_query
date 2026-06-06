@@ -51,12 +51,46 @@ log-query app.log -f module=lidar -f level=ERROR
 cat app.log | log-query -f module=planner -f level=WARN
 ```
 
+### 时间范围过滤
+
+```bash
+# 指定时间区间
+log-query app.log --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:05"
+
+# 只指定起始时间
+log-query app.log --from "2024-01-15 08:00:07"
+
+# 只指定结束时间
+log-query app.log --to "2024-01-15 08:00:01"
+
+# 时间 + 字段组合
+log-query app.log --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:05" -f level=ERROR
+```
+
+支持格式：`YYYY-MM-DD` 或 `YYYY-MM-DD HH:MM:SS`
+
+### 正则过滤
+
+```bash
+# 在 message 字段中搜索关键词
+log-query app.log --match "message=timeout|overflow"
+
+# 在 module 字段中正则匹配
+log-query app.log --match "module=.*driver"
+
+# 正则 + 字段组合
+log-query app.log -f level=ERROR --match "message=overflow|failed"
+```
+
 ### 命令行参数
 
 | 参数 | 说明 |
 |------|------|
 | `file` | 日志文件路径（`-` 表示 stdin） |
-| `-f, --filter` | 字段过滤 `field=value`，可重复使用 |
+| `-f, --filter` | 字段精确过滤 `field=value`，可重复使用 |
+| `--from` | 起始时间（`YYYY-MM-DD` 或 `YYYY-MM-DD HH:MM:SS`） |
+| `--to` | 结束时间（`YYYY-MM-DD` 或 `YYYY-MM-DD HH:MM:SS`） |
+| `-m, --match` | 正则过滤 `field=pattern`，可重复使用 |
 | `--format-config` | 日志格式配置文件路径（默认 `config/adas_default.json`） |
 | `--output` | 输出模式：`color`（默认） |
 
@@ -94,6 +128,6 @@ log-query/
 | 阶段 | 状态 | 内容 |
 |------|:----:|------|
 | Phase 1 | ✅ | 基础框架：字段过滤 + 彩色输出 |
-| Phase 2 | ⬜ | 增强过滤：时间范围、正则、统计模式 |
+| Phase 2 | 🔄 | 增强过滤：时间范围 ✅、正则 ✅、统计模式 ⬜ |
 | Phase 3 | ⬜ | 高级功能：Tail 模式、JSON/CSV 输出 |
 | Phase 4 | ⬜ | 优化完善：性能优化、测试覆盖 |
