@@ -59,7 +59,14 @@ run_test "non-matching lines"         0 printf "not a log\nneither\n" \| "$EXE" 
 run_test "case insensitive level"     3 cat "$SAMPLE" \| "$EXE" -f level=error
 
 echo ""
-echo -e "${YELLOW}[3] Pipe mode${NC}"
+echo -e "${YELLOW}[4] Plain output mode${NC}"
+
+run_test "plain output line count"      3 cat "$SAMPLE" \| "$EXE" -f level=ERROR --output plain
+run_test "plain output with filter"     6 cat "$SAMPLE" \| "$EXE" -f module=planner --output plain
+run_test "plain matches color count"    4 cat "$SAMPLE" \| "$EXE" -f level=WARN --output plain
+
+echo ""
+echo -e "${YELLOW}[5] Pipe mode${NC}"
 
 run_test "pipe from cat"              6 cat "$SAMPLE" \| "$EXE" -f module=planner
 

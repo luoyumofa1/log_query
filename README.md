@@ -84,11 +84,14 @@ log-query app.log -f level=ERROR --match "message=overflow|failed"
 
 ### 输出模式
 
-默认彩色输出到终端。JSON/CSV 模式将匹配结果写入本地文件，便于后续处理。
+默认彩色输出到终端。`plain` 模式在终端无颜色输出，适合重定向到文件或在不支持 ANSI 的终端中使用。JSON/CSV 模式将匹配结果写入本地文件，便于后续处理。
 
 ```bash
 # 默认：彩色终端输出
 log-query app.log -f level=ERROR
+
+# 无颜色终端输出（适合管道重定向）
+log-query app.log -f level=ERROR --output plain
 
 # JSON 输出（自动生成带时间戳的文件名，如 log-query-result-20260606-133217.json）
 log-query app.log -f level=ERROR --output json
@@ -110,7 +113,7 @@ log-query app.log -f level=ERROR --output json --output-file result.json
 | `--to` | 结束时间（`YYYY-MM-DD` 或 `YYYY-MM-DD HH:MM:SS`） |
 | `-m, --match` | 正则过滤 `field=pattern`，可重复使用 |
 | `--format-config` | 日志格式配置文件路径（默认 `config/adas_default.json`） |
-| `--output` | 输出模式：`color`（默认，终端）、`json`（写入文件）、`csv`（写入文件） |
+| `--output` | 输出模式：`color`（默认，终端彩色）、`plain`（终端无颜色）、`json`（写入文件）、`csv`（写入文件） |
 | `--output-file` | 输出文件路径（json/csv 模式，不指定则自动生成带时间戳的文件名） |
 
 ### 日志格式配置
@@ -148,5 +151,5 @@ log-query/
 |------|:----:|------|
 | Phase 1 | ✅ | 基础框架：字段过滤 + 彩色输出 |
 | Phase 2 | 🔄 | 增强过滤：时间范围 ✅、正则 ✅、统计模式 ⬜ |
-| Phase 3 | 🔄 | 高级功能：JSON/CSV 输出 ✅、Tail 模式 ⬜ |
+| Phase 3 | 🔄 | 高级功能：JSON/CSV 输出 ✅、Plain 无颜色输出 ✅、Tail 模式 ⬜ |
 | Phase 4 | ⬜ | 优化完善：性能优化、测试覆盖 |

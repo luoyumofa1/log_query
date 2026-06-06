@@ -150,6 +150,29 @@ Test-Case "CSV output has correct row count" {
     if ($out.Count -ne 4) { throw "Expected 4 lines (1 header + 3 data), got $($out.Count)" }
 }
 
+Test-Case "plain output has no ANSI escape codes" {
+    $out = Get-Content $sample | & $exe -f level=ERROR --output plain
+    foreach ($line in $out) {
+        if ($line -match '\x1b') { throw "Plain output should not contain ANSI escape codes" }
+    }
+}
+
+Test-Case "plain output has correct line count" {
+    $out = Get-Content $sample | & $exe -f level=ERROR --output plain
+    if ($out.Count -ne 3) { throw "Expected 3 lines, got $($out.Count)" }
+}
+
+Test-Case "plain output matches color output line count" {
+    $plainOut = Get-Content $sample | & $exe -f level=WARN --output plain
+    $colorOut = Get-Content $sample | & $exe -f level=WARN --output color
+    if ($plainOut.Count -ne $colorOut.Count) { throw "Plain ($($plainOut.Count)) and color ($($colorOut.Count)) line counts differ" }
+}
+
+Test-Case "plain output with combined filters" {
+    $out = Get-Content $sample | & $exe -f module=planner --output plain
+    if ($out.Count -ne 6) { throw "Expected 6 lines, got $($out.Count)" }
+}
+
 if (Test-Path $jsonOut) { Remove-Item $jsonOut -Force }
 if (Test-Path $csvOut) { Remove-Item $csvOut -Force }
 

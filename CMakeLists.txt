@@ -25,6 +25,7 @@ set(SOURCES
     src/output/color_renderer.cpp
     src/output/csv_renderer.cpp
     src/output/json_renderer.cpp
+    src/output/plain_renderer.cpp
 )
 
 set(HEADERS
@@ -39,6 +40,7 @@ set(HEADERS
     src/filter/regex_filter.h
     src/filter/time_range_filter.h
     src/output/color_renderer.h
+    src/output/plain_renderer.h
     src/util/ansi.h
     src/util/file_reader.h
     src/util/time_parse.h
