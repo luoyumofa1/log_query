@@ -1,26 +1,15 @@
 {
-  "name": "adas_default",
+  "name": "default",
   "level_field": "level",
-  "module_field": "module",
-  "pattern": "[{timestamp}] [{level}] [{module}] [{thread}] {message}",
+  "module_field": "source",
+  "pattern": "[{level}][{pid}][{tid}][{timestamp}][{source}:{line}] {message}",
   "fields": {
-    "timestamp": {
-      "type": "datetime",
-      "format": "%Y-%m-%d %H:%M:%S.%f"
-    },
-    "level": {
-      "type": "enum",
-      "values": ["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"]
-    },
-    "module": {
-      "type": "string"
-    },
-    "thread": {
-      "type": "string"
-    },
-    "message": {
-      "type": "string",
-      "greedy": true
-    }
+    "level": { "type": "enum", "values": ["T", "D", "I", "W", "E", "F"] },
+    "pid": { "type": "int" },
+    "tid": { "type": "int" },
+    "timestamp": { "type": "datetime", "format": "%m-%d %H:%M:%S.%f" },
+    "source": { "type": "string" },
+    "line": { "type": "int" },
+    "message": { "type": "string", "greedy": true }
   }
 }

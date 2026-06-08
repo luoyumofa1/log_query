@@ -85,22 +85,46 @@ std::optional<FieldValue> convert_field(
 int64_t parse_timestamp(std::string_view raw, const std::string& format) {
     std::string s(raw);
     std::tm tm = {};
-    std::istringstream ss(s);
+
+    bool has_year = (format.find("%Y") != std::string::npos ||
+                     format.find("%y") != std::string::npos);
 
     if (format.find("%f") != std::string::npos) {
         auto dot_pos = s.find('.');
+        std::string base_format = format;
+        auto f_pos = base_format.find("%f");
+        if (f_pos > 0 && base_format[f_pos - 1] == '.') {
+            base_format = base_format.substr(0, f_pos - 1);
+        } else {
+            base_format = base_format.substr(0, f_pos);
+        }
+
         if (dot_pos != std::string::npos) {
             std::string before_dot = s.substr(0, dot_pos);
             std::istringstream bss(before_dot);
-            bss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+            bss >> std::get_time(&tm, base_format.c_str());
             if (bss.fail()) return 0;
         } else {
-            ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
-            if (ss.fail()) return 0;
+            std::istringstream ss2(s);
+            ss2 >> std::get_time(&tm, base_format.c_str());
+            if (ss2.fail()) return 0;
         }
     } else {
+        std::istringstream ss(s);
         ss >> std::get_time(&tm, format.c_str());
         if (ss.fail()) return 0;
+    }
+
+    if (!has_year) {
+        auto now_time_t = std::chrono::system_clock::to_time_t(
+            std::chrono::system_clock::now());
+        std::tm now_tm;
+#ifdef _WIN32
+        gmtime_s(&now_tm, &now_time_t);
+#else
+        gmtime_r(&now_time_t, &now_tm);
+#endif
+        tm.tm_year = now_tm.tm_year;
     }
 
 #ifdef _WIN32

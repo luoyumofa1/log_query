@@ -1,25 +1,25 @@
-[2024-01-15 08:00:00.100] [INFO ] [can_driver]    [main]      CAN bus initialized, 3 channels
-[2024-01-15 08:00:00.200] [INFO ] [lidar_driver]  [main]      Lidar sensor connected on /dev/ttyUSB0
-[2024-01-15 08:00:00.300] [INFO ] [radar_driver]  [main]      Radar ARS408 initialized
-[2024-01-15 08:00:01.100] [INFO ] [fusion_engine] [main]      Sensor fusion started
-[2024-01-15 08:00:01.200] [INFO ] [planner]       [main]      Global path loaded: 320 waypoints
-[2024-01-15 08:00:01.300] [INFO ] [control]       [main]      MPC controller ready
-[2024-01-15 08:00:02.100] [DEBUG] [can_driver]    [rx]        CAN frame: id=0x123, dlc=8
-[2024-01-15 08:00:02.200] [DEBUG] [lidar_driver]  [rx]        Point cloud: 24000 points
-[2024-01-15 08:00:03.100] [WARN ] [lidar_driver]  [rx]        Packet loss detected, seq gap: 3
-[2024-01-15 08:00:03.200] [INFO ] [planner]       [main]      Trajectory updated: 200 waypoints
-[2024-01-15 08:00:04.100] [ERROR] [lidar_driver]  [rx]        DMA buffer overflow on channel 0
-[2024-01-15 08:00:04.200] [WARN ] [fusion_engine] [main]      Lidar data timeout, using prediction
-[2024-01-15 08:00:05.100] [INFO ] [lidar_driver]  [rx]        DMA recovered, buffer cleared
-[2024-01-15 08:00:05.200] [INFO ] [fusion_engine] [main]      Lidar data restored
-[2024-01-15 08:00:06.100] [ERROR] [planner]       [main]      Path planning failed: obstacle too close
-[2024-01-15 08:00:06.200] [WARN ] [planner]       [main]      Fallback to conservative path
-[2024-01-15 08:00:06.300] [INFO ] [planner]       [main]      Recovery successful
-[2024-01-15 08:00:07.100] [ERROR] [can_driver]    [tx]        CAN transmit timeout on channel 1
-[2024-01-15 08:00:07.200] [FATAL] [can_driver]    [main]      CAN bus offline, emergency stop triggered
-[2024-01-15 08:00:07.300] [INFO ] [control]       [main]      Emergency brake engaged
-[2024-01-15 08:00:07.400] [INFO ] [radar_driver]  [main]      Radar shutdown complete
-[2024-01-15 08:00:07.500] [INFO ] [lidar_driver]  [main]      Lidar shutdown complete
-[2024-01-15 08:00:07.600] [INFO ] [fusion_engine] [main]      Fusion engine stopped
-[2024-01-15 08:00:07.700] [INFO ] [planner]       [main]      Planner stopped
-[2024-01-15 08:00:07.800] [INFO ] [control]       [main]      Controller stopped
+[I][2640][6846][01-01 06:55:57.154][heart_beat.cpp:31] Heartbeat new record : 81 with heartBeat_timeout 500
+[I][2640][6846][01-01 06:55:57.154][heart_beat.cpp:219] Process with AppId 81 is removed from lostProcessList and marked as alive
+[W][2640][6828][01-01 06:55:57.697][heart_beat.cpp:190] Process GUBMLabel with AppId 81 heartbeat timeout
+[I][2640][6828][01-01 06:55:57.697][heart_beat.cpp:79] Heartbeat remove record : 81
+[I][2640][6846][01-01 06:56:00.100][can_driver.cpp:45] CAN bus initialized, 3 channels
+[D][2640][6828][01-01 06:56:01.200][can_driver.cpp:112] CAN frame: id=0x123, dlc=8
+[I][2640][6846][01-01 06:56:02.300][lidar_driver.cpp:78] Lidar sensor connected on /dev/ttyUSB0
+[D][2640][6828][01-01 06:56:03.100][lidar_driver.cpp:145] Point cloud: 24000 points
+[W][2640][6828][01-01 06:56:04.200][lidar_driver.cpp:201] Packet loss detected, seq gap: 3
+[E][2640][6828][01-01 06:56:05.100][lidar_driver.cpp:256] DMA buffer overflow on channel 0
+[I][2640][6846][01-01 06:56:06.200][fusion_engine.cpp:89] Sensor fusion started
+[W][2640][6846][01-01 06:56:07.300][fusion_engine.cpp:134] Lidar data timeout, using prediction
+[I][2640][6828][01-01 06:56:08.100][lidar_driver.cpp:278] DMA recovered, buffer cleared
+[I][2640][6846][01-01 06:56:09.200][fusion_engine.cpp:167] Lidar data restored
+[E][2640][6846][01-01 06:56:10.100][planner.cpp:95] Path planning failed: obstacle too close
+[W][2640][6846][01-01 06:56:11.200][planner.cpp:142] Fallback to conservative path
+[I][2640][6846][01-01 06:56:12.300][planner.cpp:178] Recovery successful
+[E][2640][6846][01-01 06:56:13.100][can_driver.cpp:198] CAN transmit timeout on channel 1
+[F][2640][6846][01-01 06:56:14.200][can_driver.cpp:245] CAN bus offline, emergency stop triggered
+[I][2640][6846][01-01 06:56:15.300][control.cpp:56] Emergency brake engaged
+[I][2640][6846][01-01 06:56:16.100][radar_driver.cpp:89] Radar shutdown complete
+[I][2640][6846][01-01 06:56:17.200][lidar_driver.cpp:312] Lidar shutdown complete
+[I][2640][6846][01-01 06:56:18.300][fusion_engine.cpp:201] Fusion engine stopped
+[I][2640][6846][01-01 06:56:19.100][planner.cpp:210] Planner stopped
+[I][2640][6846][01-01 06:56:20.200][control.cpp:98] Controller stopped

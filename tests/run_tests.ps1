@@ -33,41 +33,46 @@ Write-Host ""
 
 Write-Host "[1] Basic field filtering" -ForegroundColor Yellow
 
-Test-Case "filter by module" {
-    $out = Get-Content $sample | & $exe -f module=lidar_driver
-    if ($out.Count -ne 6) { throw "Expected 6 lines, got $($out.Count)" }
+Test-Case "filter by source" {
+    $out = Get-Content $sample | & $exe -f source=heart_beat.cpp
+    if ($out.Count -ne 4) { throw "Expected 4 lines, got $($out.Count)" }
 }
 
-Test-Case "filter by level ERROR" {
-    $out = Get-Content $sample | & $exe -f level=ERROR
+Test-Case "filter by level E" {
+    $out = Get-Content $sample | & $exe -f level=E
     if ($out.Count -ne 3) { throw "Expected 3 lines, got $($out.Count)" }
 }
 
-Test-Case "filter by module + level" {
-    $out = Get-Content $sample | & $exe -f module=lidar_driver -f level=ERROR
+Test-Case "filter by source + level" {
+    $out = Get-Content $sample | & $exe -f source=lidar_driver.cpp -f level=E
     if ($out.Count -ne 1) { throw "Expected 1 line, got $($out.Count)" }
 }
 
-Test-Case "filter by module + level (no match)" {
-    $out = Get-Content $sample | & $exe -f module=radar_driver -f level=ERROR
+Test-Case "filter by source + level (no match)" {
+    $out = Get-Content $sample | & $exe -f source=radar_driver.cpp -f level=E
     if ($out.Count -ne 0) { throw "Expected 0 lines, got $($out.Count)" }
+}
+
+Test-Case "filter by int field (line number)" {
+    $out = Get-Content $sample | & $exe -f "line>200"
+    if ($out.Count -ne 8) { throw "Expected 8 lines, got $($out.Count)" }
 }
 
 Write-Host ""
 Write-Host "[2] Edge cases" -ForegroundColor Yellow
 
 Test-Case "empty input" {
-    $out = "" | & $exe -f module=lidar
+    $out = "" | & $exe -f source=lidar
     if ($out.Count -ne 0) { throw "Expected 0 lines, got $($out.Count)" }
 }
 
 Test-Case "non-matching format lines are skipped" {
-    $out = @("this is not a log line", "neither is this") | & $exe -f module=lidar
+    $out = @("this is not a log line", "neither is this") | & $exe -f source=lidar
     if ($out.Count -ne 0) { throw "Expected 0 lines, got $($out.Count)" }
 }
 
 Test-Case "case insensitive level matching" {
-    $out = Get-Content $sample | & $exe -f level=error
+    $out = Get-Content $sample | & $exe -f level=e
     if ($out.Count -ne 3) { throw "Expected 3 lines, got $($out.Count)" }
 }
 
@@ -75,23 +80,23 @@ Write-Host ""
 Write-Host "[3] Time range filtering" -ForegroundColor Yellow
 
 Test-Case "filter by --from and --to" {
-    $out = Get-Content $sample | & $exe --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:05"
+    $out = Get-Content $sample | & $exe --from "2026-01-01 06:56:05" --to "2026-01-01 06:56:10"
     if ($out.Count -ne 6) { throw "Expected 6 lines, got $($out.Count)" }
 }
 
 Test-Case "filter by --from only" {
-    $out = Get-Content $sample | & $exe --from "2024-01-15 08:00:07"
-    if ($out.Count -ne 8) { throw "Expected 8 lines, got $($out.Count)" }
+    $out = Get-Content $sample | & $exe --from "2026-01-01 06:56:14"
+    if ($out.Count -ne 7) { throw "Expected 7 lines, got $($out.Count)" }
 }
 
 Test-Case "filter by --to only" {
-    $out = Get-Content $sample | & $exe --to "2024-01-15 08:00:01"
-    if ($out.Count -ne 6) { throw "Expected 6 lines, got $($out.Count)" }
+    $out = Get-Content $sample | & $exe --to "2026-01-01 06:56:02"
+    if ($out.Count -ne 7) { throw "Expected 7 lines, got $($out.Count)" }
 }
 
 Test-Case "time range + field filter" {
-    $out = Get-Content $sample | & $exe --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:05" -f level=ERROR
-    if ($out.Count -ne 1) { throw "Expected 1 line, got $($out.Count)" }
+    $out = Get-Content $sample | & $exe --from "2026-01-01 06:56:05" --to "2026-01-01 06:56:10" -f level=E
+    if ($out.Count -ne 2) { throw "Expected 2 lines, got $($out.Count)" }
 }
 
 Write-Host ""
@@ -99,16 +104,16 @@ Write-Host "[4] Regex filtering" -ForegroundColor Yellow
 
 Test-Case "regex on message field" {
     $out = Get-Content $sample | & $exe --match "message=timeout|overflow"
-    if ($out.Count -ne 3) { throw "Expected 3 lines, got $($out.Count)" }
+    if ($out.Count -ne 5) { throw "Expected 5 lines, got $($out.Count)" }
 }
 
-Test-Case "regex on module field" {
-    $out = Get-Content $sample | & $exe --match "module=.*driver"
-    if ($out.Count -ne 12) { throw "Expected 12 lines, got $($out.Count)" }
+Test-Case "regex on source field" {
+    $out = Get-Content $sample | & $exe --match "source=.*driver"
+    if ($out.Count -ne 11) { throw "Expected 11 lines, got $($out.Count)" }
 }
 
 Test-Case "regex + field filter" {
-    $out = Get-Content $sample | & $exe -f level=ERROR --match "message=overflow|failed"
+    $out = Get-Content $sample | & $exe -f level=E --match "message=overflow|failed"
     if ($out.Count -ne 2) { throw "Expected 2 lines, got $($out.Count)" }
 }
 
@@ -120,7 +125,7 @@ $csvOut = Join-Path $ProjectDir "test-output.csv"
 
 Test-Case "JSON output writes file with array wrapper" {
     if (Test-Path $jsonOut) { Remove-Item $jsonOut -Force }
-    Get-Content $sample | & $exe -f level=ERROR --output json --output-file $jsonOut | Out-Null
+    Get-Content $sample | & $exe -f level=E --output json --output-file $jsonOut | Out-Null
     if (-not (Test-Path $jsonOut)) { throw "JSON output file not created" }
     $out = Get-Content $jsonOut
     if ($out[0] -ne "[") { throw "Expected '[' on first line, got $($out[0])" }
@@ -129,7 +134,7 @@ Test-Case "JSON output writes file with array wrapper" {
 
 Test-Case "JSON output has correct number of entries" {
     if (Test-Path $jsonOut) { Remove-Item $jsonOut -Force }
-    Get-Content $sample | & $exe -f level=ERROR --output json --output-file $jsonOut | Out-Null
+    Get-Content $sample | & $exe -f level=E --output json --output-file $jsonOut | Out-Null
     $out = Get-Content $jsonOut
     $dataLines = $out | Where-Object { $_ -match '"line":' }
     if ($dataLines.Count -ne 3) { throw "Expected 3 data lines, got $($dataLines.Count)" }
@@ -137,7 +142,7 @@ Test-Case "JSON output has correct number of entries" {
 
 Test-Case "CSV output writes file with header" {
     if (Test-Path $csvOut) { Remove-Item $csvOut -Force }
-    Get-Content $sample | & $exe -f level=ERROR --output csv --output-file $csvOut | Out-Null
+    Get-Content $sample | & $exe -f level=E --output csv --output-file $csvOut | Out-Null
     if (-not (Test-Path $csvOut)) { throw "CSV output file not created" }
     $out = Get-Content $csvOut
     if ($out[0] -notmatch "^line,") { throw "Expected CSV header starting with 'line,', got $($out[0])" }
@@ -145,32 +150,32 @@ Test-Case "CSV output writes file with header" {
 
 Test-Case "CSV output has correct row count" {
     if (Test-Path $csvOut) { Remove-Item $csvOut -Force }
-    Get-Content $sample | & $exe -f level=ERROR --output csv --output-file $csvOut | Out-Null
+    Get-Content $sample | & $exe -f level=E --output csv --output-file $csvOut | Out-Null
     $out = Get-Content $csvOut
     if ($out.Count -ne 4) { throw "Expected 4 lines (1 header + 3 data), got $($out.Count)" }
 }
 
 Test-Case "plain output has no ANSI escape codes" {
-    $out = Get-Content $sample | & $exe -f level=ERROR --output plain
+    $out = Get-Content $sample | & $exe -f level=E --output plain
     foreach ($line in $out) {
         if ($line -match '\x1b') { throw "Plain output should not contain ANSI escape codes" }
     }
 }
 
 Test-Case "plain output has correct line count" {
-    $out = Get-Content $sample | & $exe -f level=ERROR --output plain
+    $out = Get-Content $sample | & $exe -f level=E --output plain
     if ($out.Count -ne 3) { throw "Expected 3 lines, got $($out.Count)" }
 }
 
 Test-Case "plain output matches color output line count" {
-    $plainOut = Get-Content $sample | & $exe -f level=WARN --output plain
-    $colorOut = Get-Content $sample | & $exe -f level=WARN --output color
+    $plainOut = Get-Content $sample | & $exe -f level=W --output plain
+    $colorOut = Get-Content $sample | & $exe -f level=W --output color
     if ($plainOut.Count -ne $colorOut.Count) { throw "Plain ($($plainOut.Count)) and color ($($colorOut.Count)) line counts differ" }
 }
 
 Test-Case "plain output with combined filters" {
-    $out = Get-Content $sample | & $exe -f module=planner --output plain
-    if ($out.Count -ne 6) { throw "Expected 6 lines, got $($out.Count)" }
+    $out = Get-Content $sample | & $exe -f source=planner.cpp --output plain
+    if ($out.Count -ne 4) { throw "Expected 4 lines, got $($out.Count)" }
 }
 
 if (Test-Path $jsonOut) { Remove-Item $jsonOut -Force }
@@ -197,7 +202,7 @@ Test-Case "summary output total count matches input" {
 }
 
 Test-Case "summary with filter shows filtered stats" {
-    $out = Get-Content $sample | & $exe --output summary -f level=ERROR
+    $out = Get-Content $sample | & $exe --output summary -f level=E
     $totalRow = $out | Where-Object { $_ -match "^Total" }
     if ($totalRow -notmatch "\s+3\s*$") { throw "Expected total of 3 in filtered summary, got: $totalRow" }
 }
@@ -209,9 +214,9 @@ Test-Case "summary output has separator lines" {
 }
 
 Test-Case "summary with time range" {
-    $out = Get-Content $sample | & $exe --output summary --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:07"
+    $out = Get-Content $sample | & $exe --output summary --from "2026-01-01 06:56:05" --to "2026-01-01 06:56:14"
     $totalRow = $out | Where-Object { $_ -match "^Total" }
-    if ($totalRow -notmatch "\s+17\s*$") { throw "Expected total of 17 in time-filtered summary, got: $totalRow" }
+    if ($totalRow -notmatch "\s+10\s*$") { throw "Expected total of 10 in time-filtered summary, got: $totalRow" }
 }
 
 Write-Host ""
@@ -290,8 +295,8 @@ Write-Host ""
 Write-Host "[8] Pipe mode (stdin)" -ForegroundColor Yellow
 
 Test-Case "pipe from Get-Content" {
-    $out = Get-Content $sample | & $exe -f module=planner
-    if ($out.Count -ne 6) { throw "Expected 6 lines, got $($out.Count)" }
+    $out = Get-Content $sample | & $exe -f source=planner.cpp
+    if ($out.Count -ne 4) { throw "Expected 4 lines, got $($out.Count)" }
 }
 
 Write-Host ""

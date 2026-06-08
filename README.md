@@ -38,33 +38,37 @@ chmod +x scripts/build.sh
 ### 基本过滤
 
 ```bash
-# 按模块过滤
-log-query app.log -f module=lidar
+# 按源文件过滤
+log-query app.log -f source=heart_beat.cpp
 
 # 按日志级别过滤
-log-query app.log -f level=ERROR
+log-query app.log -f level=E
 
 # 组合过滤（可重复使用 -f）
-log-query app.log -f module=lidar -f level=ERROR
+log-query app.log -f source=lidar_driver.cpp -f level=E
+
+# 数值比较过滤（支持 > >= < <= !=）
+log-query app.log -f "line>200"
+log-query app.log -f "pid!=2640"
 
 # 从管道读取
-cat app.log | log-query -f module=planner -f level=WARN
+cat app.log | log-query -f source=planner.cpp -f level=W
 ```
 
 ### 时间范围过滤
 
 ```bash
 # 指定时间区间
-log-query app.log --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:05"
+log-query app.log --from "2026-01-01 06:56:05" --to "2026-01-01 06:56:10"
 
 # 只指定起始时间
-log-query app.log --from "2024-01-15 08:00:07"
+log-query app.log --from "2026-01-01 06:56:14"
 
 # 只指定结束时间
-log-query app.log --to "2024-01-15 08:00:01"
+log-query app.log --to "2026-01-01 06:56:02"
 
 # 时间 + 字段组合
-log-query app.log --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:05" -f level=ERROR
+log-query app.log --from "2026-01-01 06:56:05" --to "2026-01-01 06:56:10" -f level=E
 ```
 
 支持格式：`YYYY-MM-DD` 或 `YYYY-MM-DD HH:MM:SS`
@@ -75,52 +79,53 @@ log-query app.log --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:05" -f lev
 # 在 message 字段中搜索关键词
 log-query app.log --match "message=timeout|overflow"
 
-# 在 module 字段中正则匹配
-log-query app.log --match "module=.*driver"
+# 在 source 字段中正则匹配
+log-query app.log --match "source=.*driver"
 
 # 正则 + 字段组合
-log-query app.log -f level=ERROR --match "message=overflow|failed"
+log-query app.log -f level=E --match "message=overflow|failed"
 ```
 
 ### 输出模式
 
-默认彩色输出到终端。`plain` 模式在终端无颜色输出，适合重定向到文件或在不支持 ANSI 的终端中使用。`summary` 模式按模块和日志级别统计汇总，输出交叉统计表。JSON/CSV 模式将匹配结果写入本地文件，便于后续处理。
+默认彩色输出到终端。`plain` 模式在终端无颜色输出，适合重定向到文件或在不支持 ANSI 的终端中使用。`summary` 模式按源文件和日志级别统计汇总，输出交叉统计表。JSON/CSV 模式将匹配结果写入本地文件，便于后续处理。
 
 ```bash
 # 默认：彩色终端输出
-log-query app.log -f level=ERROR
+log-query app.log -f level=E
 
 # 无颜色终端输出（适合管道重定向）
-log-query app.log -f level=ERROR --output plain
+log-query app.log -f level=E --output plain
 
-# 统计汇总模式（按模块 × 级别统计）
+# 统计汇总模式（按源文件 × 级别统计）
 log-query app.log --output summary
-log-query app.log --output summary -f level=ERROR
-log-query app.log --output summary --from "2024-01-15 08:00:03" --to "2024-01-15 08:00:05"
+log-query app.log --output summary -f level=E
+log-query app.log --output summary --from "2026-01-01 06:56:05" --to "2026-01-01 06:56:14"
 
 # JSON 输出（自动生成带时间戳的文件名，如 log-query-result-20260606-133217.json）
-log-query app.log -f level=ERROR --output json
+log-query app.log -f level=E --output json
 
 # CSV 输出（自动生成带时间戳的文件名，如 log-query-result-20260606-133217.csv）
-log-query app.log -f level=ERROR --output csv
+log-query app.log -f level=E --output csv
 
 # 指定输出文件路径（不自动加时间戳）
-log-query app.log -f level=ERROR --output json --output-file result.json
+log-query app.log -f level=E --output json --output-file result.json
 ```
 
 统计模式输出示例：
 
 ```
-Module              TRACE  DEBUG   INFO   WARN  ERROR  FATAL  Total
+Module              T      D      I      W      E      F  Total
 ----------------------------------------------------------------------
-can_driver              0      1      1      0      1      1      4
-control                 0      0      3      0      0      0      3
-fusion_engine           0      0      3      1      0      0      4
-lidar_driver            0      1      3      1      1      0      6
-planner                 0      0      4      1      1      0      6
-radar_driver            0      0      2      0      0      0      2
+can_driver.cpp      0      1      1      0      1      1      4
+control.cpp         0      0      3      0      0      0      3
+fusion_engine.cpp   0      0      3      1      0      0      4
+heart_beat.cpp      0      0      3      1      0      0      4
+lidar_driver.cpp    0      1      2      1      1      0      5
+planner.cpp         0      0      2      1      1      0      4
+radar_driver.cpp    0      0      1      0      0      0      1
 ----------------------------------------------------------------------
-Total                   0      2     16      3      3      1     25
+Total               0      2     15      4      3      1     25
 ```
 
 ### 命令行参数
@@ -128,23 +133,26 @@ Total                   0      2     16      3      3      1     25
 | 参数 | 说明 |
 |------|------|
 | `file` | 日志文件路径（`-` 表示 stdin） |
-| `-f, --filter` | 字段精确过滤 `field=value`，可重复使用 |
+| `-f, --filter` | 字段过滤，支持 `field=value`（精确匹配）和 `field>value`（数值比较，支持 `>` `>=` `<` `<=` `!=`），可重复使用 |
 | `--from` | 起始时间（`YYYY-MM-DD` 或 `YYYY-MM-DD HH:MM:SS`） |
 | `--to` | 结束时间（`YYYY-MM-DD` 或 `YYYY-MM-DD HH:MM:SS`） |
 | `-m, --match` | 正则过滤 `field=pattern`，可重复使用 |
 | `--format-config` | 日志格式配置文件路径（默认 `config/adas_default.json`） |
-| `--output` | 输出模式：`color`（默认，终端彩色）、`plain`（终端无颜色）、`json`（写入文件）、`csv`（写入文件） |
+| `--output` | 输出模式：`color`（默认，终端彩色）、`plain`（终端无颜色）、`summary`（统计汇总）、`json`（写入文件）、`csv`（写入文件） |
 | `--output-file` | 输出文件路径（json/csv 模式，不指定则自动生成带时间戳的文件名） |
 
 ### 日志格式配置
 
-默认支持智驾日志格式：
+默认支持智驾底层软件日志格式：
 
 ```
-[2024-01-15 14:32:01.123] [ERROR] [lidar_driver] [rx_thread] Failed to read sensor data
+[I][2640][6846][01-01 06:55:57.154][heart_beat.cpp:31] Heartbeat new record : 81 with heartBeat_timeout 500
+[W][2640][6828][01-01 06:55:57.697][heart_beat.cpp:190] Process GUBMLabel with AppId 81 heartbeat timeout
 ```
 
-可通过 `--format-config` 指定自定义格式的 JSON 配置文件。JSON 中通过 `level_field` 指定级别字段名，用于着色。
+默认配置字段：level（枚举 T/D/I/W/E/F）、pid（int）、tid（int）、timestamp（datetime，`%m-%d %H:%M:%S.%f`）、source（string）、line（int）、message（string）。
+
+可通过 `--format-config` 指定自定义格式的 JSON 配置文件。JSON 中通过 `level_field` 指定级别字段名（用于着色），`module_field` 指定模块字段名（用于统计汇总）。
 
 ## 项目结构
 

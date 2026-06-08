@@ -48,46 +48,47 @@ echo ""
 
 echo -e "${YELLOW}[1] Basic field filtering${NC}"
 
-run_test "filter by module"           6 "cat '$SAMPLE' | '$EXE' -f module=lidar_driver"
-run_test "filter by level ERROR"      3 "cat '$SAMPLE' | '$EXE' -f level=ERROR"
-run_test "filter by module + level"   1 "cat '$SAMPLE' | '$EXE' -f module=lidar_driver -f level=ERROR"
-run_test "filter no match"            0 "cat '$SAMPLE' | '$EXE' -f module=radar_driver -f level=ERROR"
+run_test "filter by source"           4 "cat '$SAMPLE' | '$EXE' -f source=heart_beat.cpp"
+run_test "filter by level E"          3 "cat '$SAMPLE' | '$EXE' -f level=E"
+run_test "filter by source + level"   1 "cat '$SAMPLE' | '$EXE' -f source=lidar_driver.cpp -f level=E"
+run_test "filter no match"            0 "cat '$SAMPLE' | '$EXE' -f source=radar_driver.cpp -f level=E"
+run_test "filter by line number"      8 "cat '$SAMPLE' | '$EXE' -f 'line>200'"
 
 echo ""
 echo -e "${YELLOW}[2] Edge cases${NC}"
 
-run_test "empty input"                0 "echo '' | '$EXE' -f module=lidar"
-run_test "non-matching lines"         0 "printf 'not a log\nneither\n' | '$EXE' -f module=lidar"
-run_test "case insensitive level"     3 "cat '$SAMPLE' | '$EXE' -f level=error"
+run_test "empty input"                0 "echo '' | '$EXE' -f source=lidar"
+run_test "non-matching lines"         0 "printf 'not a log\nneither\n' | '$EXE' -f source=lidar"
+run_test "case insensitive level"     3 "cat '$SAMPLE' | '$EXE' -f level=e"
 
 echo ""
 echo -e "${YELLOW}[3] Time range filtering${NC}"
 
-run_test "filter by from and to"      6 "cat '$SAMPLE' | '$EXE' --from '2024-01-15 08:00:03' --to '2024-01-15 08:00:05'"
-run_test "filter by from only"        8 "cat '$SAMPLE' | '$EXE' --from '2024-01-15 08:00:07'"
-run_test "filter by to only"          6 "cat '$SAMPLE' | '$EXE' --to '2024-01-15 08:00:01'"
-run_test "time range + field filter"  1 "cat '$SAMPLE' | '$EXE' --from '2024-01-15 08:00:03' --to '2024-01-15 08:00:05' -f level=ERROR"
+run_test "filter by from and to"      6 "cat '$SAMPLE' | '$EXE' --from '2026-01-01 06:56:05' --to '2026-01-01 06:56:10'"
+run_test "filter by from only"        7 "cat '$SAMPLE' | '$EXE' --from '2026-01-01 06:56:14'"
+run_test "filter by to only"          7 "cat '$SAMPLE' | '$EXE' --to '2026-01-01 06:56:02'"
+run_test "time range + field filter"  2 "cat '$SAMPLE' | '$EXE' --from '2026-01-01 06:56:05' --to '2026-01-01 06:56:10' -f level=E"
 
 echo ""
 echo -e "${YELLOW}[4] Regex filtering${NC}"
 
-run_test "regex on message"           3 "cat '$SAMPLE' | '$EXE' --match 'message=timeout|overflow'"
-run_test "regex on module"           12 "cat '$SAMPLE' | '$EXE' --match 'module=.*driver'"
-run_test "regex + field filter"       2 "cat '$SAMPLE' | '$EXE' -f level=ERROR --match 'message=overflow|failed'"
+run_test "regex on message"           5 "cat '$SAMPLE' | '$EXE' --match 'message=timeout|overflow'"
+run_test "regex on source"           11 "cat '$SAMPLE' | '$EXE' --match 'source=.*driver'"
+run_test "regex + field filter"       2 "cat '$SAMPLE' | '$EXE' -f level=E --match 'message=overflow|failed'"
 
 echo ""
 echo -e "${YELLOW}[5] Plain output mode${NC}"
 
-run_test "plain output line count"      3 "cat '$SAMPLE' | '$EXE' -f level=ERROR --output plain"
-run_test "plain output with filter"     6 "cat '$SAMPLE' | '$EXE' -f module=planner --output plain"
-run_test "plain matches color count"    3 "cat '$SAMPLE' | '$EXE' -f level=WARN --output plain"
+run_test "plain output line count"      3 "cat '$SAMPLE' | '$EXE' -f level=E --output plain"
+run_test "plain output with filter"     4 "cat '$SAMPLE' | '$EXE' -f source=planner.cpp --output plain"
+run_test "plain matches color count"    4 "cat '$SAMPLE' | '$EXE' -f level=W --output plain"
 
 echo ""
 echo -e "${YELLOW}[6] Summary output mode${NC}"
 
-run_test "summary all lines"           10 "cat '$SAMPLE' | '$EXE' --output summary"
-run_test "summary with filter"          7 "cat '$SAMPLE' | '$EXE' --output summary -f level=ERROR"
-run_test "summary with time range"     10 "cat '$SAMPLE' | '$EXE' --output summary --from '2024-01-15 08:00:03' --to '2024-01-15 08:00:07'"
+run_test "summary all lines"           11 "cat '$SAMPLE' | '$EXE' --output summary"
+run_test "summary with filter"          7 "cat '$SAMPLE' | '$EXE' --output summary -f level=E"
+run_test "summary with time range"      8 "cat '$SAMPLE' | '$EXE' --output summary --from '2026-01-01 06:56:05' --to '2026-01-01 06:56:14'"
 
 echo ""
 echo -e "${YELLOW}[7] Numeric comparison filtering${NC}"
@@ -109,7 +110,7 @@ run_test "int equal + level"            2 "cat '$METRICS_SAMPLE' | '$EXE' --form
 echo ""
 echo -e "${YELLOW}[8] Pipe mode${NC}"
 
-run_test "pipe from cat"              6 "cat '$SAMPLE' | '$EXE' -f module=planner"
+run_test "pipe from cat"              4 "cat '$SAMPLE' | '$EXE' -f source=planner.cpp"
 
 echo ""
 echo -e "${CYAN}========================================"
