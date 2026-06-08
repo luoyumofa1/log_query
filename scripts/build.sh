@@ -93,4 +93,4 @@ fi
 echo ""
 
 echo -e "${CYAN}Quick test:${NC}"
-echo -e "  echo '[2024-01-15 14:32:01.123] [ERROR] [lidar] [rx] timeout' | ${EXE_PATH} -f module=lidar -f level=ERROR"
+echo -e "  echo '[E][2640][6828][01-01 06:55:57.697][heart_beat.cpp:190] heartbeat timeout' | ${EXE_PATH} -f source=heart_beat.cpp -f level=E"
