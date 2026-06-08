@@ -33,12 +33,12 @@ const char* ColorRenderer::level_color(const std::string& level) {
     std::transform(upper.begin(), upper.end(), upper.begin(),
                    [](unsigned char c) { return std::toupper(c); });
 
-    if (upper == "FATAL") return ansi::BG_RED;
-    if (upper == "ERROR") return ansi::RED;
-    if (upper == "WARN")  return ansi::YELLOW;
-    if (upper == "INFO")  return ansi::WHITE;
-    if (upper == "DEBUG") return ansi::GRAY;
-    if (upper == "TRACE") return ansi::GRAY;
+    if (upper == "FATAL" || upper == "F") return ansi::BG_RED;
+    if (upper == "ERROR" || upper == "E") return ansi::RED;
+    if (upper == "WARN"  || upper == "W") return ansi::YELLOW;
+    if (upper == "INFO"  || upper == "I") return ansi::WHITE;
+    if (upper == "DEBUG" || upper == "D") return ansi::GRAY;
+    if (upper == "TRACE" || upper == "T") return ansi::GRAY;
     return ansi::WHITE;
 }
 
